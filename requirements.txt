@@ -1,0 +1,6 @@
+langchain
+openai
+python-dotenv
+wikipedia
+tiktoken
+neo4j

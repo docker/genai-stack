@@ -1,0 +1,32 @@
+version: '3'
+services:
+
+  database:
+    image: neo4j:latest
+    ports:
+      - 7687:7687
+      - 7474:7474
+    environment:
+      - NEO4J_AUTH=neo4j/password
+#      - NEO4J_ACCEPT_LICENSE_AGREEMENT=developer
+    networks:
+      - net
+
+  langchain-app:
+    build: .
+
+    environment:
+      - NEO4J_URI=neo4j://database:7687
+      - NEO4J_PASSWORD=password
+      - NEO4J_USERNAME=neo4j
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    networks:
+      - net
+    depends_on:
+      - database
+
+    ports:
+      - 8080:8080
+
+networks:
+  net:
