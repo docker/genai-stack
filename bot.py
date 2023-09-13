@@ -19,21 +19,7 @@ os.environ["NEO4J_URL"] = url
 
 embeddings = OpenAIEmbeddings()
 
-# Read the wikipedia article
-raw_documents = WikipediaLoader(query=page).load()
-
-# Define chunking strategy
-text_splitter = CharacterTextSplitter.from_tiktoken_encoder(
-    chunk_size=1000, chunk_overlap=20
-)
-# Chunk the document
-documents = text_splitter.split_documents(raw_documents)
-# Remove the summary
-for d in documents:
-    del d.metadata["summary"]
-
-neo4j_db = Neo4jVector.from_documents(
-    documents,
+neo4j_db = Neo4jVector.from_existing_index(
     embedding=embeddings,
     url=url,
     username=username,
@@ -43,17 +29,8 @@ neo4j_db = Neo4jVector.from_documents(
     node_label="WikipediaArticle",  # Chunk by default
     text_node_property="info",  # text by default
     embedding_node_property="vector",  # embedding by default
-    create_id_index=True,  # True by default
-)
-
-neo4j_db.add_documents(
-    [
-        Document(
-            page_content="LangChain is the coolest library since the Library of Alexandria",
-            metadata={"author": "Tomaz", "confidence": 1.0}
-        )
-    ],
-    ids=["langchain"],
+    create_id_index=False,  # True by default
+    # todo retrieval query for KG
 )
 
 result = neo4j_db.similarity_search(prompt, k=1)
