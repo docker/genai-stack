@@ -2,13 +2,13 @@ version: '3'
 services:
 
   database:
-    image: neo4j:latest
+    image: neo4j:enterprise
     ports:
       - 7687:7687
       - 7474:7474
     environment:
       - NEO4J_AUTH=neo4j/password
-#      - NEO4J_ACCEPT_LICENSE_AGREEMENT=developer
+      - NEO4J_ACCEPT_LICENSE_AGREEMENT=eval
     networks:
       - net
 
