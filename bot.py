@@ -1,10 +1,8 @@
 import os
 
 from langchain.vectorstores.neo4j_vector import Neo4jVector
-from langchain.document_loaders import WikipediaLoader
 from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.text_splitter import CharacterTextSplitter
-from langchain.docstore.document import Document
+from langchain.embeddings import GPT4AllEmbeddings
 from dotenv import load_dotenv
 
 load_dotenv('.env')
@@ -17,7 +15,8 @@ prompt = os.getenv('PROMPT') or "What is the second largest city in Sweden?"
 
 os.environ["NEO4J_URL"] = url
 
-embeddings = OpenAIEmbeddings()
+# embeddings = OpenAIEmbeddings()
+embeddings = GPT4AllEmbeddings()
 
 neo4j_db = Neo4jVector.from_existing_index(
     embedding=embeddings,
@@ -29,10 +28,12 @@ neo4j_db = Neo4jVector.from_existing_index(
     node_label="WikipediaArticle",  # Chunk by default
     text_node_property="info",  # text by default
     embedding_node_property="vector",  # embedding by default
-    create_id_index=False,  # True by default
     # todo retrieval query for KG
 )
 
 result = neo4j_db.similarity_search(prompt, k=1)
 
 print(result)
+
+res = embeddings.embed_query(prompt)
+print(len(res))

@@ -1,6 +1,13 @@
 version: '3'
 services:
 
+  llm:
+    image: ollama/ollama:latest
+    ports:
+      - 11434:11434
+    networks:
+      - net
+
   database:
     image: neo4j:enterprise
     ports:
@@ -25,6 +32,7 @@ services:
       - net
     depends_on:
       - database
+      - llm
 
     ports:
       - 8081:8080
@@ -42,6 +50,7 @@ services:
       - net
     depends_on:
       - database
+      - llm
       - loader
 
     ports:
