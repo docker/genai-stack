@@ -49,6 +49,6 @@ neo4j_db = Neo4jVector.from_documents(
 )
 
 # testing
-result = neo4j_db.similarity_search("What is the capital of Sweden", k=1)
+#result = neo4j_db.similarity_search("What is the capital of Sweden", k=1)
 
-print(result)
+#print(result)
