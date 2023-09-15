@@ -3,7 +3,7 @@ import os
 import streamlit as st
 from langchain.vectorstores.neo4j_vector import Neo4jVector
 from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.embeddings import GPT4AllEmbeddings
+from langchain.embeddings import OllamaEmbeddings
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory
@@ -20,7 +20,7 @@ prompt = os.getenv('PROMPT') or "What is the second largest city in Sweden?"
 os.environ["NEO4J_URL"] = url
 
 # embeddings = OpenAIEmbeddings()
-embeddings = GPT4AllEmbeddings()
+embeddings = OllamaEmbeddings()
 
 neo4j_db = Neo4jVector.from_existing_index(
     embedding=embeddings,

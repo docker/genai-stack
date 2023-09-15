@@ -4,5 +4,4 @@ python-dotenv
 wikipedia
 tiktoken
 neo4j
-gpt4all
 streamlit

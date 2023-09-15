@@ -6,7 +6,7 @@ from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.docstore.document import Document
 from dotenv import load_dotenv
-from langchain.embeddings import GPT4AllEmbeddings
+from langchain.embeddings import OllamaEmbeddings
 
 load_dotenv('.env')
 
@@ -18,7 +18,7 @@ page = os.getenv('WIKIPEDIA_PAGE') or "Sweden" # todo country list of the world
 os.environ["NEO4J_URL"] = url
 
 # embeddings = OpenAIEmbeddings()
-embeddings = GPT4AllEmbeddings()
+embeddings = OllamaEmbeddings()
 
 
 # Read the wikipedia article
