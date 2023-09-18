@@ -14,8 +14,13 @@ services:
       - 7687:7687
       - 7474:7474
     environment:
-      - NEO4J_AUTH=neo4j/password
+      - NEO4J_AUTH=${NEO4J_USERNAME-neo4j}/${NEO4J_PASSWORD-password}
       - NEO4J_ACCEPT_LICENSE_AGREEMENT=eval
+    healthcheck:
+        test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:7474 || exit 1"]
+        interval: 5s
+        timeout: 3s
+        retries: 5
     networks:
       - net
 
@@ -31,8 +36,10 @@ services:
     networks:
       - net
     depends_on:
-      - database
-      - llm
+      database:
+        condition: service_healthy
+      llm:
+        condition: service_started
 
     ports:
       - 8081:8080
@@ -49,9 +56,10 @@ services:
     networks:
       - net
     depends_on:
-      - database
-      - llm
-      - loader
+      database:
+        condition: service_healthy
+      llm:
+        condition: service_started
 
     ports:
       - 8501:8501
