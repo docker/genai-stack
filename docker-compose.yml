@@ -16,6 +16,7 @@ services:
     environment:
       - NEO4J_AUTH=${NEO4J_USERNAME-neo4j}/${NEO4J_PASSWORD-password}
       - NEO4J_ACCEPT_LICENSE_AGREEMENT=eval
+      - NEO4J_PLUGINS=["apoc"]
     healthcheck:
         test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:7474 || exit 1"]
         interval: 5s

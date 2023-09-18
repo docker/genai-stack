@@ -9,18 +9,18 @@ from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory
 from dotenv import load_dotenv
 
-load_dotenv('.env')
+load_dotenv(".env")
 
-url = os.getenv('NEO4J_URI')
-username = os.getenv('NEO4J_USERNAME')
-password = os.getenv('NEO4J_PASSWORD')
-page = os.getenv('WIKIPEDIA_PAGE') or "Sweden"
-prompt = os.getenv('PROMPT') or "What is the second largest city in Sweden?"
+url = os.getenv("NEO4J_URI")
+username = os.getenv("NEO4J_USERNAME")
+password = os.getenv("NEO4J_PASSWORD")
+page = os.getenv("WIKIPEDIA_PAGE") or "Sweden"
+prompt = os.getenv("PROMPT") or "What is the second largest city in Sweden?"
 
 os.environ["NEO4J_URL"] = url
 
-# embeddings = OpenAIEmbeddings()
-embeddings = OllamaEmbeddings()
+embeddings = OpenAIEmbeddings()
+# embeddings = OllamaEmbeddings()
 
 neo4j_db = Neo4jVector.from_existing_index(
     embedding=embeddings,
@@ -28,25 +28,26 @@ neo4j_db = Neo4jVector.from_existing_index(
     username=username,
     password=password,
     database="neo4j",  # neo4j by default
-    index_name="wikipedia",  # vector by default
-    node_label="WikipediaArticle",  # Chunk by default
-    text_node_property="info",  # text by default
-    embedding_node_property="vector",  # embedding by default
+    index_name="stackoverflow",  # vector by default
+    node_label="Question",  # Chunk by default
+    text_node_property="body",  # text by default
+    embedding_node_property="embedding",  # embedding by default
     # todo retrieval query for KG
 )
 
-#result = neo4j_db.similarity_search(prompt, k=1)
+# result = neo4j_db.similarity_search(prompt, k=1)
 #
-#print(result)
+# print(result)
 #
-#res = embeddings.embed_query(prompt)
-#print(len(res))
+# res = embeddings.embed_query(prompt)
+# print(len(res))
 
 
 memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
-qa = ConversationalRetrievalChain.from_llm(ChatOpenAI(temperature=0), neo4j_db.as_retriever(), memory=memory)
-
+qa = ConversationalRetrievalChain.from_llm(
+    ChatOpenAI(temperature=0), neo4j_db.as_retriever(), memory=memory
+)
 
 
 # Streamlit stuff
@@ -58,9 +59,11 @@ if "generated" not in st.session_state:
 if "user_input" not in st.session_state:
     st.session_state["user_input"] = []
 
+
 def get_text() -> str:
     input_text = st.chat_input("Ask away?")
     return input_text
+
 
 user_input = get_text()
 
