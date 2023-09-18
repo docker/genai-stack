@@ -11,7 +11,6 @@ load_dotenv(".env")
 url = os.getenv("NEO4J_URI")
 username = os.getenv("NEO4J_USERNAME")
 password = os.getenv("NEO4J_PASSWORD")
-page = os.getenv("WIKIPEDIA_PAGE") or "Sweden"  # todo country list of the world
 
 os.environ["NEO4J_URL"] = url
 
