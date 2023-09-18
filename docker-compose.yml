@@ -60,6 +60,10 @@ services:
         condition: service_healthy
       llm:
         condition: service_started
+    x-develop:
+      watch:
+        - action: rebuild
+          path: bot.py
 
     ports:
       - 8501:8501
