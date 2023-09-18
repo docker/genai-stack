@@ -1,54 +1,80 @@
 import os
+import requests
 
-from langchain.vectorstores.neo4j_vector import Neo4jVector
-from langchain.document_loaders import WikipediaLoader
-from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.text_splitter import CharacterTextSplitter
-from langchain.docstore.document import Document
 from dotenv import load_dotenv
-from langchain.embeddings import OllamaEmbeddings
+from bs4 import BeautifulSoup
+from langchain.embeddings import OllamaEmbeddings, OpenAIEmbeddings
+from langchain.graphs import Neo4jGraph
 
-load_dotenv('.env')
+load_dotenv(".env")
 
-url = os.getenv('NEO4J_URI')
-username = os.getenv('NEO4J_USERNAME')
-password = os.getenv('NEO4J_PASSWORD')
-page = os.getenv('WIKIPEDIA_PAGE') or "Sweden" # todo country list of the world
+url = os.getenv("NEO4J_URI")
+username = os.getenv("NEO4J_USERNAME")
+password = os.getenv("NEO4J_PASSWORD")
 
 os.environ["NEO4J_URL"] = url
 
-# embeddings = OpenAIEmbeddings()
-embeddings = OllamaEmbeddings()
+# embeddings = OllamaEmbeddings()
+embeddings = OpenAIEmbeddings()
+
+neo4j_graph = Neo4jGraph(url=url, username=username, password=password)
 
 
-# Read the wikipedia article
-raw_documents = WikipediaLoader(query=page).load()
+def load_so_data(tag: str = "neo4j", page: int = 1):
+    base_url = "https://api.stackexchange.com/2.2/questions"
+    parameters = (
+        f"?pagesize=100&page={page}&order=desc&sort=creation&tagged={tag}"
+        "&site=stackoverflow&filter=!6WPIomnMNcVD9"
+    )
+    data = requests.get(base_url + parameters).json()
+    # Convert html to text and calculate embedding values
+    for q in data["items"]:
+        question_text = BeautifulSoup(q["body"], features="html.parser").text
+        q["body"] = question_text
+        q["embedding"] = embeddings.embed_query(q["title"] + " " + question_text)
+        if q.get("answers"):
+            for a in q.get("answers"):
+                a["body"] = BeautifulSoup(a["body"], features="html.parser").text
 
-# Define chunking strategy
-text_splitter = CharacterTextSplitter.from_tiktoken_encoder(
-    chunk_size=1000, chunk_overlap=20
-)
-# Chunk the document
-documents = text_splitter.split_documents(raw_documents)
-# Remove the summary
-for d in documents:
-    del d.metadata["summary"]
+    import_query = """
+    UNWIND $data AS q
+    MERGE (question:Question {id:q.question_id}) 
+    ON CREATE SET question.title = q.title, question.link = q.link,
+        question.favorite_count = q.favorite_count, question.creation_date = q.creation_date,
+        question.body = q.body, question.embedding = q.embedding
+    FOREACH (tagName IN q.tags | 
+        MERGE (tag:Tag {name:tagName}) 
+        MERGE (question)-[:TAGGED]->(tag)
+    )
+    FOREACH (a IN q.answers |
+        MERGE (question)<-[:ANSWERS]-(answer:Answer {id:a.answer_id})
+        SET answer.is_accepted = a.is_accepted,
+            answer.score = a.score,
+            answer.creation_date = a.creation_date,
+            answer.body = a.body
+        MERGE (answerer:User {id:coalesce(a.owner.user_id, "deleted")}) 
+        ON CREATE SET answerer.display_name = a.owner.display_name,
+                      answerer.reputation= a.owner.reputation
+        MERGE (answer)<-[:PROVIDED]-(answerer)
+    )
+    WITH * WHERE NOT q.owner.user_id IS NULL
+    MERGE (owner:User {id:q.owner.user_id})
+    ON CREATE SET owner.display_name = q.owner.display_name,
+                  owner.reputation = q.owner.reputation
+    MERGE (owner)-[:ASKED]->(question)
+    """
+    neo4j_graph.query(import_query, {"data": data["items"]})
 
-neo4j_db = Neo4jVector.from_documents(
-    documents,
-    embedding=embeddings,
-    url=url,
-    username=username,
-    password=password,
-    database="neo4j",  # neo4j by default
-    index_name="wikipedia",  # vector by default
-    node_label="WikipediaArticle",  # Chunk by default
-    text_node_property="info",  # text by default
-    embedding_node_property="vector",  # embedding by default
-    create_id_index=True,  # True by default
-)
 
-# testing
-#result = neo4j_db.similarity_search("What is the capital of Sweden", k=1)
+def create_vector_index():
+    # Fix to Ollama embedding dimension
+    index_query = "CALL db.index.vector.createNodeIndex('stackoverflow', 'Question', 'embedding', 1536, 'cosine')"
+    try:
+        neo4j_graph.query(index_query)
+    except:  # Already exists
+        pass
 
-#print(result)
+
+if __name__ == "__main__":
+    load_so_data("neo4j", 1)
+    create_vector_index()
