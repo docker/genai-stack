@@ -37,7 +37,6 @@ def load_so_data(tag: str = "neo4j", page: int = 1):
             for a in q.get("answers"):
                 a["body"] = BeautifulSoup(a["body"], features="html.parser").text
 
-    # Load data into Neo4j directly using APOC
     import_query = """
     UNWIND $data AS q
     MERGE (question:Question {id:q.question_id}) 
