@@ -41,7 +41,7 @@ def create_constraints():
 create_constraints()
 
 dimension = 1536  # OpenAi
-# dimension =  500 # Ollama
+# dimension =  4096 # Ollama
 
 
 def create_vector_index(dimension):
