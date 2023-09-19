@@ -61,8 +61,8 @@ services:
     depends_on:
       database:
         condition: service_healthy
-      llm:
-        condition: service_started
+      # llm:
+      #   condition: service_started
     x-develop:
       watch:
         - action: rebuild
