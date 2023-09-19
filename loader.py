@@ -20,10 +20,11 @@ embeddings = OpenAIEmbeddings()
 
 neo4j_graph = Neo4jGraph(url=url, username=username, password=password)
 
-neo4j_graph.query("CREATE CONSTRAINT question_id IF NOT EXISTS FOR (q:Question) REQUIRE (q.id) IS UNIQUE")
-neo4j_graph.query("CREATE CONSTRAINT answer_id IF NOT EXISTS FOR (a:Answer) REQUIRE (a.id) IS UNIQUE")
-neo4j_graph.query("CREATE CONSTRAINT user_id IF NOT EXISTS FOR (u:User) REQUIRE (u.id) IS UNIQUE")
-neo4j_graph.query("CREATE CONSTRAINT tag_name IF NOT EXISTS FOR (t:Tag) REQUIRE (t.name) IS UNIQUE")
+def create_constraints():
+    neo4j_graph.query("CREATE CONSTRAINT question_id IF NOT EXISTS FOR (q:Question) REQUIRE (q.id) IS UNIQUE")
+    neo4j_graph.query("CREATE CONSTRAINT answer_id IF NOT EXISTS FOR (a:Answer) REQUIRE (a.id) IS UNIQUE")
+    neo4j_graph.query("CREATE CONSTRAINT user_id IF NOT EXISTS FOR (u:User) REQUIRE (u.id) IS UNIQUE")
+    neo4j_graph.query("CREATE CONSTRAINT tag_name IF NOT EXISTS FOR (t:Tag) REQUIRE (t.name) IS UNIQUE")
 
 def load_so_data(tag: str = "neo4j", page: int = 1):
     base_url = "https://api.stackexchange.com/2.2/questions"
@@ -72,11 +73,11 @@ def load_so_data(tag: str = "neo4j", page: int = 1):
 
 
 dimension = 1536 # OpenAi
-# dimension =  500 # Ollama
+# dimension =  4096 # Ollama
 
 def create_vector_index():
     # TODO use Neo4jVector Code from LangChain on the existing graph
-    index_query = "CALL db.index.vector.createNodeIndex('stackoverflow', 'Question', 'embedding', dimension, 'cosine')"
+    index_query = "CALL db.index.vector.createNodeIndex('stackoverflow', 'Question', 'embedding', dimension, 'euclidean')"
     try:
         neo4j_graph.query(index_query)
     except:  # Already exists
@@ -84,5 +85,9 @@ def create_vector_index():
 
 
 if __name__ == "__main__":
+    print("Creating constraints")
+    create_constraints()
+    print("Creating index")
     create_vector_index()
+    print("Loading data")
     load_so_data("neo4j", 1)
