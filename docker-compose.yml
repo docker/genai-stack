@@ -9,7 +9,7 @@ services:
       - net
 
   database:
-    image: neo4j:enterprise
+    image: neo4j:5.11-enterprise
     ports:
       - 7687:7687
       - 7474:7474
