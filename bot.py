@@ -78,60 +78,63 @@ kg_memory = ConversationBufferMemory(memory_key="chat_history", return_messages=
 kg_qa = ConversationalRetrievalChain.from_llm(llm, kg.as_retriever(), memory=kg_memory)
 
 # Streamlit stuff
-
-# Make sure the text input is at the bottom
-# We can't use chat_input as it can't be put into a tab
 styl = f"""
 <style>
-    .stTextInput {{
+    /* not great support for :has yet (hello FireFox), but using it for now */
+    .element-container:has([aria-label="Select sophistication mode"]) {{
       position: fixed;
-      bottom: 6rem;
+      bottom: 115px;
+      background: white;
+      z-index: 101;
     }}
 </style>
 """
 st.markdown(styl, unsafe_allow_html=True)
 
-
-def tab_view(name, output_function):
+def chat_input():
     # Session state
     if "generated" not in st.session_state:
-        st.session_state[f"generated_{name}"] = []
+        st.session_state[f"generated"] = []
 
     if "user_input" not in st.session_state:
-        st.session_state[f"user_input_{name}"] = []
+        st.session_state[f"user_input"] = []
 
-    user_input = st.text_input(
-        f"{name} mode",
-        placeholder="Ask your question",
-        key=f"route_{name}",
-        label_visibility="hidden",
-    )
+    if "rag_mode" not in st.session_state:
+        st.session_state[f"rag_mode"] = []
+
+    user_input = st.chat_input("What coding issue can I help you resolve today?")
 
     if user_input:
-        with st.spinner():
-            output = output_function(user_input)
+        output = output_function(user_input)
+        st.session_state[f"user_input"].append(user_input)
+        st.session_state[f"generated"].append(output)
+        st.session_state[f"rag_mode"].append(name)
 
-        st.session_state[f"user_input_{name}"].append(user_input)
-        st.session_state[f"generated_{name}"].append(output)
-
-    if st.session_state[f"generated_{name}"]:
-        size = len(st.session_state[f"generated_{name}"])
+def display_chat():
+    if st.session_state[f"generated"]:
+        size = len(st.session_state[f"generated"])
         # Display only the last three exchanges
         for i in range(max(size - 3, 0), size):
             with st.chat_message("user"):
-                st.write(st.session_state[f"user_input_{name}"][i])
+                st.write(st.session_state[f"user_input"][i])
 
             with st.chat_message("assistant"):
-                st.write(st.session_state[f"generated_{name}"][i])
+                st.caption(f"Mode: {st.session_state[f'rag_mode'][i]}")
+                st.write(st.session_state[f"generated"][i])
+
+def mode_select() -> str:
+    options = ["LLM only", "Vector", "Vector + Graph"]
+    return st.radio("Select sophistication mode", options, horizontal=True)
+
+name = mode_select()
+if(name == "LLM only"):
+    output_function = generate_llm_output
+elif(name == "Vector"):
+    output_function = qa.run
+elif(name == "Vector + Graph"):
+    output_function = kg_qa.run
+
+chat_input()
+display_chat()
 
 
-llm_view, rag_view, kgrag_view = st.tabs(["LLM only", "Vector", "Vector + Graph"])
-
-with llm_view:
-    tab_view("llm", generate_llm_output)
-
-with rag_view:
-    tab_view("rag", qa.run)
-
-with kgrag_view:
-    tab_view("kg", kg_qa.run)
