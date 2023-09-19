@@ -6,6 +6,8 @@ from bs4 import BeautifulSoup
 from langchain.embeddings import OllamaEmbeddings, OpenAIEmbeddings
 from langchain.graphs import Neo4jGraph
 
+import streamlit as st
+
 load_dotenv(".env")
 
 url = os.getenv("NEO4J_URI")
@@ -20,13 +22,41 @@ embeddings = OpenAIEmbeddings()
 
 neo4j_graph = Neo4jGraph(url=url, username=username, password=password)
 
-def create_constraints():
-    neo4j_graph.query("CREATE CONSTRAINT question_id IF NOT EXISTS FOR (q:Question) REQUIRE (q.id) IS UNIQUE")
-    neo4j_graph.query("CREATE CONSTRAINT answer_id IF NOT EXISTS FOR (a:Answer) REQUIRE (a.id) IS UNIQUE")
-    neo4j_graph.query("CREATE CONSTRAINT user_id IF NOT EXISTS FOR (u:User) REQUIRE (u.id) IS UNIQUE")
-    neo4j_graph.query("CREATE CONSTRAINT tag_name IF NOT EXISTS FOR (t:Tag) REQUIRE (t.name) IS UNIQUE")
 
-def load_so_data(tag: str = "neo4j", page: int = 1):
+def create_constraints():
+    neo4j_graph.query(
+        "CREATE CONSTRAINT question_id IF NOT EXISTS FOR (q:Question) REQUIRE (q.id) IS UNIQUE"
+    )
+    neo4j_graph.query(
+        "CREATE CONSTRAINT answer_id IF NOT EXISTS FOR (a:Answer) REQUIRE (a.id) IS UNIQUE"
+    )
+    neo4j_graph.query(
+        "CREATE CONSTRAINT user_id IF NOT EXISTS FOR (u:User) REQUIRE (u.id) IS UNIQUE"
+    )
+    neo4j_graph.query(
+        "CREATE CONSTRAINT tag_name IF NOT EXISTS FOR (t:Tag) REQUIRE (t.name) IS UNIQUE"
+    )
+
+
+create_constraints()
+
+dimension = 1536  # OpenAi
+# dimension =  500 # Ollama
+
+
+def create_vector_index(dimension):
+    # TODO use Neo4jVector Code from LangChain on the existing graph
+    index_query = "CALL db.index.vector.createNodeIndex('stackoverflow', 'Question', 'embedding', $dimension, 'cosine')"
+    try:
+        neo4j_graph.query(index_query, {"dimension": dimension})
+    except:  # Already exists
+        pass
+
+
+create_vector_index(dimension)
+
+
+def load_so_data(tag: str = "neo4j", page: int = 1) -> None:
     base_url = "https://api.stackexchange.com/2.2/questions"
     parameters = (
         f"?pagesize=100&page={page}&order=desc&sort=creation&tagged={tag}"
@@ -72,22 +102,24 @@ def load_so_data(tag: str = "neo4j", page: int = 1):
     neo4j_graph.query(import_query, {"data": data["items"]})
 
 
-dimension = 1536 # OpenAi
-# dimension =  4096 # Ollama
-
-def create_vector_index():
-    # TODO use Neo4jVector Code from LangChain on the existing graph
-    index_query = "CALL db.index.vector.createNodeIndex('stackoverflow', 'Question', 'embedding', dimension, 'euclidean')"
-    try:
-        neo4j_graph.query(index_query)
-    except:  # Already exists
-        pass
+# Streamlit
+def get_tag() -> str:
+    input_text = st.text_input("Which tag are you interested in?", value="neo4j")
+    return input_text
 
 
-if __name__ == "__main__":
-    print("Creating constraints")
-    create_constraints()
-    print("Creating index")
-    create_vector_index()
-    print("Loading data")
-    load_so_data("neo4j", 1)
+def get_pages() -> int:
+    number = st.number_input("Number of pages (100)", step=1, min_value=1)
+    return int(number)
+
+
+user_input = get_tag()
+pages = get_pages()
+
+if st.button("Import"):
+    with st.spinner("Loading"):
+        try:
+            load_so_data(user_input, pages)
+            st.success("Import successful", icon="✅")
+        except Exception as e:
+            st.error(f"Error: {e}", icon="🚨")

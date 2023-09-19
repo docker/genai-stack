@@ -45,6 +45,7 @@ services:
 
     ports:
       - 8081:8080
+      - 8502:8502
 
   bot:
     build:
