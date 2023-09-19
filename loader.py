@@ -71,7 +71,7 @@ def load_so_data(tag: str = "neo4j", page: int = 1):
 
 
 dimension = 1536 # OpenAi
-# dimension =  3xx # Ollama
+# dimension =  500 # Ollama
 
 def create_vector_index():
     # TODO use Neo4jVector Code from LangChain on the existing graph
