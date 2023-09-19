@@ -34,13 +34,14 @@ UI: http://localhost:8501
 
 ##  App 2 Loader
 
-UI: http://localhost:8081  
+UI: http://localhost:8502 
 DB client: http://localhost:7474
 
 - import recent (last weeks/months) SO data for certain tags into a KG
 - embed questions and answers and store in vector index
 - UI: choose tags, run import, see progress, some stats of data in the database
 
+![](.github/media/app2-ui.png)  
 ![](.github/media/app2-model.png)
 
 ## App 3 Summarization / generation tasks

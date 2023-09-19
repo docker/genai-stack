@@ -104,12 +104,13 @@ def load_so_data(tag: str = "neo4j", page: int = 1) -> None:
 
 # Streamlit
 def get_tag() -> str:
-    input_text = st.text_input("Which tag are you interested in?", value="neo4j")
+    input_text = st.text_input("Which tag questions do you want to import?", value="neo4j")
     return input_text
 
 
 def get_pages() -> int:
-    number = st.number_input("Number of pages (100)", step=1, min_value=1)
+    number = st.number_input("Number of pages (100 questions per page)", step=1, min_value=1)
+    st.caption("Only questions with answers will be imported.")
     return int(number)
 
 st.header("StackOverflow Loader")
