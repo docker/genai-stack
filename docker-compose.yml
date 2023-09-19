@@ -34,6 +34,7 @@ services:
       - NEO4J_PASSWORD=${NEO4J_PASSWORD-password}
       - NEO4J_USERNAME=${NEO4J_USERNAME-neo4j}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL-http://host.docker.internal:11434}
     networks:
       - net
     depends_on:

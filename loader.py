@@ -11,10 +11,11 @@ load_dotenv(".env")
 url = os.getenv("NEO4J_URI")
 username = os.getenv("NEO4J_USERNAME")
 password = os.getenv("NEO4J_PASSWORD")
+ollama_base_url = os.getenv("OLLAMA_BASE_URL")
 
 os.environ["NEO4J_URL"] = url
 
-# embeddings = OllamaEmbeddings()
+# embeddings = OllamaEmbeddings(base_url=ollama_base_url)
 embeddings = OpenAIEmbeddings()
 
 neo4j_graph = Neo4jGraph(url=url, username=username, password=password)
