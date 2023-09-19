@@ -112,6 +112,9 @@ def get_pages() -> int:
     number = st.number_input("Number of pages (100)", step=1, min_value=1)
     return int(number)
 
+st.header("StackOverflow Loader")
+st.subheader("Choose StackOverflow tags to load into Neo4j")
+st.caption("Go to http://localhost:7474/browser/ to explore the graph.")
 
 user_input = get_tag()
 pages = get_pages()
