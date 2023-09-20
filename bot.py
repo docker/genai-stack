@@ -5,12 +5,10 @@ from langchain.vectorstores.neo4j_vector import Neo4jVector
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.embeddings import OllamaEmbeddings
 from langchain.chat_models import ChatOpenAI, ChatOllama
-from langchain.chains import ConversationalRetrievalChain
-from langchain.memory import ConversationBufferMemory
+from langchain.chains import RetrievalQAWithSourcesChain
 from langchain.prompts.chat import (
     ChatPromptTemplate,
     SystemMessagePromptTemplate,
-    AIMessagePromptTemplate,
     HumanMessagePromptTemplate,
 )
 from dotenv import load_dotenv
@@ -28,7 +26,7 @@ os.environ["NEO4J_URL"] = url
 # llm = ChatOllama(temperature=0, base_url=ollama_base_url)
 
 embeddings = OpenAIEmbeddings()
-llm = ChatOpenAI(temperature=0)
+llm = ChatOpenAI(temperature=0, model_name="gpt-4")
 
 # LLM only response
 template = "You are a helpful assistant that helps with programming questions."
@@ -57,10 +55,21 @@ neo4j_db = Neo4jVector.from_existing_index(
     database="neo4j",  # neo4j by default
     index_name="stackoverflow",  # vector by default
     text_node_property="body",  # text by default
+    retrieval_query="""
+CALL  { with node
+    MATCH (node)<-[:ANSWERS]-(a)
+    WITH a
+    ORDER BY a.is_accepted DESC, a.score DESC
+    WITH collect(a.body)[..1] as answers
+    RETURN reduce(str='', text IN answers | str +  text + '\n') as answerTexts
+} 
+RETURN node.body + '\n' + answerTexts AS text, score, {source:node.link} AS metadata
+""",
 )
 
-memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-qa = ConversationalRetrievalChain.from_llm(llm, neo4j_db.as_retriever(), memory=memory)
+qa = RetrievalQAWithSourcesChain.from_chain_type(
+    llm, chain_type="stuff", retriever=neo4j_db.as_retriever(search_kwargs={"k": 2})
+)
 
 # Rag + KG
 kg = Neo4jVector.from_existing_index(
@@ -74,8 +83,9 @@ kg = Neo4jVector.from_existing_index(
     retrieval_query="RETURN 'fancy' AS text, 1 AS score, {} AS metadata",  # Fix this
 )
 
-kg_memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-kg_qa = ConversationalRetrievalChain.from_llm(llm, kg.as_retriever(), memory=kg_memory)
+kg_qa = RetrievalQAWithSourcesChain.from_chain_type(
+    llm, chain_type="stuff", retriever=kg.as_retriever(search_kwargs={"k": 2})
+)
 
 # Streamlit stuff
 styl = f"""
@@ -91,6 +101,7 @@ styl = f"""
 """
 st.markdown(styl, unsafe_allow_html=True)
 
+
 def chat_input():
     # Session state
     if "generated" not in st.session_state:
@@ -105,10 +116,15 @@ def chat_input():
     user_input = st.chat_input("What coding issue can I help you resolve today?")
 
     if user_input:
-        output = output_function(user_input)
+        try:
+            data = output_function(user_input)
+            output = data["answer"] + "\n" + data["sources"]
+        except KeyError:
+            output = output_function(user_input)
         st.session_state[f"user_input"].append(user_input)
         st.session_state[f"generated"].append(output)
         st.session_state[f"rag_mode"].append(name)
+
 
 def display_chat():
     if st.session_state[f"generated"]:
@@ -122,19 +138,19 @@ def display_chat():
                 st.caption(f"Mode: {st.session_state[f'rag_mode'][i]}")
                 st.write(st.session_state[f"generated"][i])
 
+
 def mode_select() -> str:
     options = ["LLM only", "Vector", "Vector + Graph"]
     return st.radio("Select sophistication mode", options, horizontal=True)
 
+
 name = mode_select()
-if(name == "LLM only"):
+if name == "LLM only":
     output_function = generate_llm_output
-elif(name == "Vector"):
-    output_function = qa.run
-elif(name == "Vector + Graph"):
-    output_function = kg_qa.run
+elif name == "Vector":
+    output_function = qa
+elif name == "Vector + Graph":
+    output_function = kg_qa
 
 chat_input()
 display_chat()
-
-
