@@ -108,22 +108,27 @@ def get_tag() -> str:
     return input_text
 
 
-def get_pages() -> int:
-    number = st.number_input("Number of pages (100 questions per page)", step=1, min_value=1)
+def get_pages():
+    col1, col2 = st.columns(2)
+    with col1:
+        num_pages = st.number_input("Number of pages (100 questions per page)", step=1, min_value=1)
+    with col2:
+        start_page = st.number_input("Start page", step=1, min_value=1)
     st.caption("Only questions with answers will be imported.")
-    return int(number)
+    return (int(num_pages), int(start_page))
 
 st.header("StackOverflow Loader")
 st.subheader("Choose StackOverflow tags to load into Neo4j")
 st.caption("Go to http://localhost:7474/browser/ to explore the graph.")
 
 user_input = get_tag()
-pages = get_pages()
+num_pages, start_page = get_pages()
 
 if st.button("Import"):
-    with st.spinner("Loading"):
+    with st.spinner("Loading... This might take a minute or two."):
         try:
-            load_so_data(user_input, pages)
+            for page in range(1, num_pages + 1):
+                load_so_data(user_input, start_page + (page-1))
             st.success("Import successful", icon="✅")
         except Exception as e:
             st.error(f"Error: {e}", icon="🚨")
