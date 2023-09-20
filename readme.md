@@ -6,15 +6,26 @@
 Use an `.env` file for the OPENAI_API_KEY (see `env.example`)
 
 # Develop
-To start everything
+**To start everything**
 ```
 docker compose up
 ```
+If changes to build scripts has been made, **rebuild**
+```
+docker compose up --build
+```
 
-To enter watch mode (auto rebuild on file changes).  
+To enter **watch mode** (auto rebuild on file changes).  
 First start everything, then in new terminal:
 ```
 docker compose alpha watch
+```
+
+**Shutdown**  
+Is health check fails or containers doesn't start up as expected, shutdown
+completely to start up again.
+```
+docker compose down
 ```
 
 # Applications
@@ -30,19 +41,24 @@ UI: http://localhost:8501
     - LLM + RAG (vector + knowledge graph context)
 - allow to generate an great SO question for the current conversation based on the style of highly rated questions in the database
 
-![](.github/media/app1-concept.png)
+![concept, not actual UI](.github/media/app1-concept.png)  
+*(not actual UI, just showing the concept)*
+
+--- 
 
 ##  App 2 Loader
 
-UI: http://localhost:8502 
+UI: http://localhost:8502  
 DB client: http://localhost:7474
 
 - import recent (last weeks/months) SO data for certain tags into a KG
 - embed questions and answers and store in vector index
 - UI: choose tags, run import, see progress, some stats of data in the database
 
-![](.github/media/app2-ui.png)  
+![](.github/media/app2-ui-1.png)  
 ![](.github/media/app2-model.png)
+
+---
 
 ## App 3 Summarization / generation tasks
 
