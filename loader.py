@@ -18,7 +18,10 @@ ollama_base_url = os.getenv("OLLAMA_BASE_URL")
 os.environ["NEO4J_URL"] = url
 
 # embeddings = OllamaEmbeddings(base_url=ollama_base_url)
+# dimension =  4096 # Ollama
+
 embeddings = OpenAIEmbeddings()
+dimension = 1536  # OpenAi
 
 neo4j_graph = Neo4jGraph(url=url, username=username, password=password)
 
@@ -39,10 +42,6 @@ def create_constraints():
 
 
 create_constraints()
-
-dimension = 1536  # OpenAi
-# dimension =  4096 # Ollama
-
 
 def create_vector_index(dimension):
     # TODO use Neo4jVector Code from LangChain on the existing graph
