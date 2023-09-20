@@ -4,7 +4,7 @@ import streamlit as st
 from langchain.vectorstores.neo4j_vector import Neo4jVector
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.embeddings import OllamaEmbeddings
-from langchain.chat_models import ChatOpenAI
+from langchain.chat_models import ChatOpenAI, ChatOllama
 from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory
 from langchain.prompts.chat import (
@@ -25,8 +25,9 @@ ollama_base_url = os.getenv("OLLAMA_BASE_URL")
 os.environ["NEO4J_URL"] = url
 
 # embeddings = OllamaEmbeddings(base_url=ollama_base_url)
-embeddings = OpenAIEmbeddings()
+# llm = ChatOllama(temperature=0, base_url=ollama_base_url)
 
+embeddings = OpenAIEmbeddings()
 llm = ChatOpenAI(temperature=0)
 
 # LLM only response
