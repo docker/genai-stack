@@ -39,11 +39,12 @@ chat_prompt = ChatPromptTemplate.from_messages(
 
 
 def generate_llm_output(user_input: str) -> str:
-    return llm(
+    answer = llm(
         chat_prompt.format_prompt(
             text=user_input,
         ).to_messages()
     ).content
+    return {"answer":answer,"sources":""}
 
 
 # Rag response
@@ -56,14 +57,8 @@ neo4j_db = Neo4jVector.from_existing_index(
     index_name="stackoverflow",  # vector by default
     text_node_property="body",  # text by default
     retrieval_query="""
-CALL  { with node
-    MATCH (node)<-[:ANSWERS]-(a)
-    WITH a
-    ORDER BY a.is_accepted DESC, a.score DESC
-    WITH collect(a.body)[..1] as answers
-    RETURN reduce(str='', text IN answers | str +  text + '\n') as answerTexts
-} 
-RETURN node.body + '\n' + answerTexts AS text, score, {source:node.link} AS metadata
+    OPTIONAL MATCH (node)<-[:ANSWERS]-(a)
+    RETURN node.title + '\n' + node.body + '\n' + coalesce(a.text,"") AS text, score, {source:node.link} AS metadata LIMIT 1
 """,
 )
 
@@ -80,7 +75,16 @@ kg = Neo4jVector.from_existing_index(
     database="neo4j",  # neo4j by default
     index_name="stackoverflow",  # vector by default
     text_node_property="body",  # text by default
-    retrieval_query="RETURN 'fancy' AS text, 1 AS score, {} AS metadata",  # Fix this
+    retrieval_query="""
+CALL  { with node
+    MATCH (node)<-[:ANSWERS]-(a)
+    WITH a
+    ORDER BY a.is_accepted DESC, a.score DESC
+    WITH collect(a.body)[..2] as answers
+    RETURN reduce(str='', text IN answers | str +  text + '\n') as answerTexts
+} 
+RETURN node.body + '\n' + answerTexts AS text, score, {source:node.link} AS metadata
+""",
 )
 
 kg_qa = RetrievalQAWithSourcesChain.from_chain_type(
@@ -117,9 +121,10 @@ def chat_input():
 
     if user_input:
         try:
-            data = output_function(user_input)
-            output = data["answer"] + "\n" + data["sources"]
-        except TypeError:
+            result = output_function(user_input)
+            if not type(result) is list: result=[result]
+            output = "\n".join([data["answer"] + "\n" + data["sources"] for data in result])
+        except (KeyError, TypeError): # todo should we really have control-flow by exception?
             output = output_function(user_input)
         st.session_state[f"user_input"].append(user_input)
         st.session_state[f"generated"].append(output)
