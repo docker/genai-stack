@@ -119,7 +119,7 @@ def chat_input():
         try:
             data = output_function(user_input)
             output = data["answer"] + "\n" + data["sources"]
-        except KeyError:
+        except TypeError:
             output = output_function(user_input)
         st.session_state[f"user_input"].append(user_input)
         st.session_state[f"generated"].append(output)
