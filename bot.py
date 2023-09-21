@@ -26,7 +26,7 @@ os.environ["NEO4J_URL"] = url
 # llm = ChatOllama(temperature=0, base_url=ollama_base_url)
 
 embeddings = OpenAIEmbeddings()
-llm = ChatOpenAI(temperature=0, model_name="gpt-4")
+llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")
 
 # LLM only response
 template = "You are a helpful assistant that helps with programming questions."
