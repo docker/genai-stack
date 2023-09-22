@@ -2,7 +2,7 @@ import os
 import requests
 
 from dotenv import load_dotenv
-from langchain.embeddings import OllamaEmbeddings, OpenAIEmbeddings
+from langchain.embeddings import OllamaEmbeddings, OpenAIEmbeddings, SentenceTransformerEmbeddings
 from langchain.graphs import Neo4jGraph
 
 import streamlit as st
@@ -13,17 +13,24 @@ url = os.getenv("NEO4J_URI")
 username = os.getenv("NEO4J_USERNAME")
 password = os.getenv("NEO4J_PASSWORD")
 ollama_base_url = os.getenv("OLLAMA_BASE_URL")
+embedding_model_name = os.getenv("EMBEDDING_MODEL")
 
 os.environ["NEO4J_URL"] = url
 
-# embeddings = OllamaEmbeddings(base_url=ollama_base_url)
-# dimension =  4096 # Ollama
-
-embeddings = OpenAIEmbeddings()
-dimension = 1536  # OpenAi
+if embedding_model_name == "ollama":
+    embeddings = OllamaEmbeddings(base_url=ollama_base_url, model="llama2")
+    dimension =  4096
+    print("Embedding: Using Ollama")
+elif embedding_model_name == "openai":
+    embeddings = OpenAIEmbeddings()
+    dimension = 1536
+    print("Embedding: Using OpenAI")
+else:
+    embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
+    dimension = 384
+    print("Embedding: Using SentenceTransformer")
 
 neo4j_graph = Neo4jGraph(url=url, username=username, password=password)
-
 
 def create_constraints():
     neo4j_graph.query(

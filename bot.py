@@ -3,7 +3,7 @@ import os
 import streamlit as st
 from langchain.vectorstores.neo4j_vector import Neo4jVector
 from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.embeddings import OllamaEmbeddings
+from langchain.embeddings import OllamaEmbeddings, SentenceTransformerEmbeddings
 from langchain.chat_models import ChatOpenAI, ChatOllama
 from langchain.chains import RetrievalQAWithSourcesChain
 from langchain.prompts.chat import (
@@ -19,14 +19,30 @@ url = os.getenv("NEO4J_URI")
 username = os.getenv("NEO4J_USERNAME")
 password = os.getenv("NEO4J_PASSWORD")
 ollama_base_url = os.getenv("OLLAMA_BASE_URL")
+embedding_model_name = os.getenv("EMBEDDING_MODEL")
+llm_name = os.getenv("LLM")
 
 os.environ["NEO4J_URL"] = url
 
-# embeddings = OllamaEmbeddings(base_url=ollama_base_url)
-# llm = ChatOllama(temperature=0, base_url=ollama_base_url)
-
-embeddings = OpenAIEmbeddings()
-llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")
+if embedding_model_name == "ollama":
+    embeddings = OllamaEmbeddings(base_url=ollama_base_url, model="llama2")
+    print("Embedding: Using Ollama")
+elif embedding_model_name == "openai":
+    embeddings = OpenAIEmbeddings()
+    print("Embedding: Using OpenAI")
+else:
+    embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
+    print("Embedding: Using SentenceTransformer")
+    
+if llm_name == "gpt-4":
+    llm = ChatOpenAI(temperature=0, model_name="gpt-4")
+    print("LLM: Using GPT-4")
+elif llm_name == "ollama":
+    llm = ChatOllama(temperature=0, base_url=ollama_base_url, model="llama2")
+    print("LLM: Using Ollama (llama2)")
+else:
+    llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")
+    print("LLM: Using GPT-3.5 Turbo")
 
 # LLM only response
 template = "You are a helpful assistant that helps with programming questions."
