@@ -36,7 +36,6 @@ class StreamHandler(BaseCallbackHandler):
         self.text += token
         self.container.markdown(self.text)
 
-
 if embedding_model_name == "ollama":
     embeddings = OllamaEmbeddings(base_url=ollama_base_url, model="llama2")
     print("Embedding: Using Ollama")
@@ -94,8 +93,26 @@ neo4j_db = Neo4jVector.from_existing_index(
 """,
 )
 
+general_system_template = """ 
+Use the following pieces of context to answer the question at the end.
+If you don't know the answer, just say that you don't know, don't try to make up an answer.
+Each document in the context contains the source information.
+For every document that you use information from, return their source link at the end of the answer.
+----
+{context}
+----
+"""
+general_user_template = "Question:```{question}```"
+messages = [
+    SystemMessagePromptTemplate.from_template(general_system_template),
+    HumanMessagePromptTemplate.from_template(general_user_template),
+]
+qa_prompt = ChatPromptTemplate.from_messages(messages)
+
 qa = ConversationalRetrievalChain.from_llm(
-    llm, retriever=neo4j_db.as_retriever(search_kwargs={"k": 2})
+    llm,
+    retriever=neo4j_db.as_retriever(search_kwargs={"k": 2}),
+    combine_docs_chain_kwargs={"prompt": qa_prompt},
 )
 
 # Rag + KG
@@ -120,7 +137,9 @@ RETURN node.body + '\n' + answerTexts AS text, score, {source:node.link} AS meta
 )
 
 kg_qa = ConversationalRetrievalChain.from_llm(
-    llm, retriever=kg.as_retriever(search_kwargs={"k": 2})
+    llm,
+    retriever=kg.as_retriever(search_kwargs={"k": 2}),
+    combine_docs_chain_kwargs={"prompt": qa_prompt},
 )
 
 # Streamlit stuff
