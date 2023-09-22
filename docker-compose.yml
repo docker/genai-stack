@@ -1,13 +1,6 @@
 version: '3'
 services:
 
-  llm:
-    image: ollama/ollama:latest
-    ports:
-      - 11434:11434
-    networks:
-      - net
-
   database:
     image: neo4j:5.11
     ports:
@@ -40,8 +33,6 @@ services:
     depends_on:
       database:
         condition: service_healthy
-      # llm:
-      #   condition: service_started
 
     ports:
       - 8081:8080
@@ -67,8 +58,6 @@ services:
     depends_on:
       database:
         condition: service_healthy
-      # llm:
-      #   condition: service_started
     x-develop:
       watch:
         - action: rebuild
