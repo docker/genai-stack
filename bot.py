@@ -2,6 +2,7 @@ import os
 from typing import List, Any
 
 import streamlit as st
+from streamlit.logger import get_logger
 from langchain.callbacks.base import BaseCallbackHandler
 from langchain.vectorstores.neo4j_vector import Neo4jVector
 from langchain.embeddings.openai import OpenAIEmbeddings
@@ -26,6 +27,7 @@ llm_name = os.getenv("LLM")
 
 os.environ["NEO4J_URL"] = url
 
+logger = get_logger(__name__)
 
 class StreamHandler(BaseCallbackHandler):
     def __init__(self, container, initial_text=""):
@@ -38,28 +40,31 @@ class StreamHandler(BaseCallbackHandler):
 
 if embedding_model_name == "ollama":
     embeddings = OllamaEmbeddings(base_url=ollama_base_url, model="llama2")
-    print("Embedding: Using Ollama")
+    logger.info("Embedding: Using Ollama")
 elif embedding_model_name == "openai":
     embeddings = OpenAIEmbeddings()
-    print("Embedding: Using OpenAI")
+    logger.info("Embedding: Using OpenAI")
 else:
     embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
-    print("Embedding: Using SentenceTransformer")
+    logger.info("Embedding: Using SentenceTransformer")
 
 if llm_name == "gpt-4":
     llm = ChatOpenAI(temperature=0, model_name="gpt-4", streaming=True)
-    print("LLM: Using GPT-4")
+    logger.info("LLM: Using GPT-4")
 elif llm_name == "ollama":
     llm = ChatOllama(
         temperature=0, base_url=ollama_base_url, model="llama2", streaming=True
     )
-    print("LLM: Using Ollama (llama2)")
+    logger.info("LLM: Using Ollama (llama2)")
 else:
     llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo", streaming=True)
-    print("LLM: Using GPT-3.5 Turbo")
+    logger.info("LLM: Using GPT-3.5 Turbo")
 
 # LLM only response
-template = "You are a helpful assistant that helps with programming questions."
+template = """
+You are a helpful assistant that helps with programming questions.
+If you don't know the answer, just say that you don't know, don't try to make up an answer.
+"""
 system_message_prompt = SystemMessagePromptTemplate.from_template(template)
 human_template = "{text}"
 human_message_prompt = HumanMessagePromptTemplate.from_template(human_template)
