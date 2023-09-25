@@ -6,9 +6,13 @@ services:
     ports:
       - 7687:7687
       - 7474:7474
+    volumes:
+      - $PWD/data:/data
     environment:
       - NEO4J_AUTH=${NEO4J_USERNAME-neo4j}/${NEO4J_PASSWORD-password}
       - NEO4J_PLUGINS=["apoc"]
+      - NEO4J_server_metrics_enabled=false
+      - NEO4J_db_tx__log_rotation_retention__policy=false
     healthcheck:
         test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:7474 || exit 1"]
         interval: 5s
@@ -28,6 +32,10 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - OLLAMA_BASE_URL=${OLLAMA_BASE_URL-http://host.docker.internal:11434}
       - EMBEDDING_MODEL=${EMBEDDING_MODEL-sentence_transformer}
+      - LANGCHAIN_ENDPOINT=${LANGCHAIN_ENDPOINT-"https://api.smith.langchain.com"}
+      - LANGCHAIN_TRACING_V2=${LANGCHAIN_TRACING_V2-false}
+      - LANGCHAIN_PROJECT=${LANGCHAIN_PROJECT}
+      - LANGCHAIN_API_KEY=${LANGCHAIN_API_KEY}
     networks:
       - net
     depends_on:
@@ -55,6 +63,10 @@ services:
       - OLLAMA_BASE_URL=${OLLAMA_BASE_URL-http://host.docker.internal:11434}
       - LLM=${LLM-gpt-3.5}
       - EMBEDDING_MODEL=${EMBEDDING_MODEL-sentence_transformer}
+      - LANGCHAIN_ENDPOINT=${LANGCHAIN_ENDPOINT-"https://api.smith.langchain.com"}
+      - LANGCHAIN_TRACING_V2=${LANGCHAIN_TRACING_V2-false}
+      - LANGCHAIN_PROJECT=${LANGCHAIN_PROJECT}
+      - LANGCHAIN_API_KEY=${LANGCHAIN_API_KEY}
     networks:
       - net
     depends_on:
