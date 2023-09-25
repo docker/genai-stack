@@ -116,7 +116,7 @@ neo4j_db = Neo4jVector.from_existing_index(
     text_node_property="body",  # text by default
     retrieval_query="""
     OPTIONAL MATCH (node)-[:ANSWERS]->(question)
-    RETURN question.title + '\n' + question.body + '\n' + coalesce(node.body,"") AS text, score, {source:question.link} AS metadata LIMIT 1
+    RETURN question.title + '\n' + question.body + '\n' + coalesce(node.body,"") AS text, score, {source:question.link} AS metadata
 """,
 )
 
