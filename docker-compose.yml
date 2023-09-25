@@ -23,7 +23,8 @@ services:
   loader:
     build:
       dockerfile: loader.Dockerfile
-
+    volumes:
+      - $PWD/embedding_model:/embedding_model
     environment:
       - NEO4J_URI=${NEO4J_URI-neo4j://database:7687}
       - NEO4J_PASSWORD=${NEO4J_PASSWORD-password}
@@ -53,7 +54,8 @@ services:
   bot:
     build:
       dockerfile: bot.Dockerfile
-
+    volumes:
+      - $PWD/embedding_model:/embedding_model
     environment:
       - NEO4J_URI=${NEO4J_URI-neo4j://database:7687}
       - NEO4J_PASSWORD=${NEO4J_PASSWORD-password}

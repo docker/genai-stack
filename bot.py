@@ -64,7 +64,7 @@ elif embedding_model_name == "openai":
     dimension = 1536
     logger.info("Embedding: Using OpenAI")
 else:
-    embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
+    embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2", cache_folder="/embedding_model")
     dimension = 384
     logger.info("Embedding: Using SentenceTransformer")
 
