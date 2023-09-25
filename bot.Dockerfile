@@ -15,6 +15,7 @@ RUN pip install --upgrade -r requirements.txt
 
 # COPY .env .
 COPY bot.py .
+COPY utils.py .
 
 EXPOSE 8501
 
