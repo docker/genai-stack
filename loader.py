@@ -92,7 +92,7 @@ def load_so_data(tag: str = "neo4j", page: int = 1) -> None:
     import_query = """
     UNWIND $data AS q
     MERGE (question:Question {id:q.question_id}) 
-    ON CREATE SET question.title = q.title, question.link = q.link,
+    ON CREATE SET question.title = q.title, question.link = q.link, question.score = q.score,
         question.favorite_count = q.favorite_count, question.creation_date = datetime({epochSeconds: q.creation_date}),
         question.body = q.body_markdown, question.embedding = q.embedding
     FOREACH (tagName IN q.tags | 
