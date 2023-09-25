@@ -173,7 +173,7 @@ kg_qa = ConversationalRetrievalChain.from_llm(
 styl = f"""
 <style>
     /* not great support for :has yet (hello FireFox), but using it for now */
-    .element-container:has([aria-label="Select sophistication mode"]) {{
+    .element-container:has([aria-label="Select RAG mode"]) {{
       position: fixed;
       bottom: 115px;
       background: white;
@@ -228,7 +228,7 @@ def display_chat():
 
 def mode_select() -> str:
     options = ["LLM only", "Vector", "Vector + Graph"]
-    return st.radio("Select sophistication mode", options, horizontal=True)
+    return st.radio("Select RAG mode", options, horizontal=True)
 
 
 name = mode_select()
