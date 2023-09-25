@@ -14,6 +14,8 @@ from langchain.prompts.chat import (
     SystemMessagePromptTemplate,
     HumanMessagePromptTemplate,
 )
+from langchain.graphs import Neo4jGraph
+
 from dotenv import load_dotenv
 
 load_dotenv(".env")
@@ -29,6 +31,21 @@ os.environ["NEO4J_URL"] = url
 
 logger = get_logger(__name__)
 
+
+neo4j_graph = Neo4jGraph(url=url, username=username, password=password)
+
+def create_vector_index(dimension):
+    index_query = "CALL db.index.vector.createNodeIndex('stackoverflow', 'Question', 'embedding', $dimension, 'cosine')"
+    try:
+        neo4j_graph.query(index_query, {"dimension": dimension})
+    except:  # Already exists
+        pass
+    index_query = "CALL db.index.vector.createNodeIndex('top_answers', 'Answer', 'embedding', $dimension, 'cosine')"
+    try:
+        neo4j_graph.query(index_query, {"dimension": dimension})
+    except:  # Already exists
+        pass
+
 class StreamHandler(BaseCallbackHandler):
     def __init__(self, container, initial_text=""):
         self.container = container
@@ -40,13 +57,18 @@ class StreamHandler(BaseCallbackHandler):
 
 if embedding_model_name == "ollama":
     embeddings = OllamaEmbeddings(base_url=ollama_base_url, model="llama2")
+    dimension = 4096
     logger.info("Embedding: Using Ollama")
 elif embedding_model_name == "openai":
     embeddings = OpenAIEmbeddings()
+    dimension = 1536
     logger.info("Embedding: Using OpenAI")
 else:
     embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
+    dimension = 384
     logger.info("Embedding: Using SentenceTransformer")
+
+create_vector_index(dimension)
 
 if llm_name == "gpt-4":
     llm = ChatOpenAI(temperature=0, model_name="gpt-4", streaming=True)
@@ -62,7 +84,7 @@ else:
 
 # LLM only response
 template = """
-You are a helpful assistant that helps with programming questions.
+You are a helpful assistant that helps a support agent with answering programming questions.
 If you don't know the answer, just say that you don't know, don't try to make up an answer.
 """
 system_message_prompt = SystemMessagePromptTemplate.from_template(template)
@@ -90,11 +112,11 @@ neo4j_db = Neo4jVector.from_existing_index(
     username=username,
     password=password,
     database="neo4j",  # neo4j by default
-    index_name="stackoverflow",  # vector by default
+    index_name="top_answers",  # vector by default
     text_node_property="body",  # text by default
     retrieval_query="""
-    OPTIONAL MATCH (node)<-[:ANSWERS]-(a)
-    RETURN node.title + '\n' + node.body + '\n' + coalesce(a.body,"") AS text, score, {source:node.link} AS metadata LIMIT 1
+    OPTIONAL MATCH (node)-[:ANSWERS]->(question)
+    RETURN question.title + '\n' + question.body + '\n' + coalesce(node.body,"") AS text, score, {source:question.link} AS metadata
 """,
 )
 
@@ -120,7 +142,7 @@ qa = ConversationalRetrievalChain.from_llm(
     combine_docs_chain_kwargs={"prompt": qa_prompt},
 )
 
-# Rag + KG
+# Rag + Knowledge Graph response
 kg = Neo4jVector.from_existing_index(
     embedding=embeddings,
     url=url,
@@ -137,7 +159,7 @@ CALL  { with node
     WITH collect(a.body)[..2] as answers
     RETURN reduce(str='', text IN answers | str +  text + '\n') as answerTexts
 } 
-RETURN node.body + '\n' + answerTexts AS text, score, {source:node.link} AS metadata
+RETURN node.title + '\n' + node.body + '\n' + answerTexts AS text, score, {source:node.link} AS metadata
 """,
 )
 

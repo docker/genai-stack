@@ -10,6 +10,7 @@ from langchain.embeddings import (
 from langchain.graphs import Neo4jGraph
 
 import streamlit as st
+from streamlit.logger import get_logger
 
 load_dotenv(".env")
 
@@ -21,18 +22,20 @@ embedding_model_name = os.getenv("EMBEDDING_MODEL")
 
 os.environ["NEO4J_URL"] = url
 
+logger = get_logger(__name__)
+
 if embedding_model_name == "ollama":
     embeddings = OllamaEmbeddings(base_url=ollama_base_url, model="llama2")
     dimension = 4096
-    print("Embedding: Using Ollama")
+    logger.info("Embedding: Using Ollama")
 elif embedding_model_name == "openai":
     embeddings = OpenAIEmbeddings()
     dimension = 1536
-    print("Embedding: Using OpenAI")
+    logger.info("Embedding: Using OpenAI")
 else:
     embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
     dimension = 384
-    print("Embedding: Using SentenceTransformer")
+    logger.info("Embedding: Using SentenceTransformer")
 
 neo4j_graph = Neo4jGraph(url=url, username=username, password=password)
 
@@ -56,8 +59,12 @@ create_constraints()
 
 
 def create_vector_index(dimension):
-    # TODO use Neo4jVector Code from LangChain on the existing graph
     index_query = "CALL db.index.vector.createNodeIndex('stackoverflow', 'Question', 'embedding', $dimension, 'cosine')"
+    try:
+        neo4j_graph.query(index_query, {"dimension": dimension})
+    except:  # Already exists
+        pass
+    index_query = "CALL db.index.vector.createNodeIndex('top_answers', 'Answer', 'embedding', $dimension, 'cosine')"
     try:
         neo4j_graph.query(index_query, {"dimension": dimension})
     except:  # Already exists
@@ -74,9 +81,13 @@ def load_so_data(tag: str = "neo4j", page: int = 1) -> None:
         "&site=stackoverflow&filter=!51dU0b1n(WTdqj5MH1iGsNShY6BhXXwJ)xwV5b"
     )
     data = requests.get(base_url + parameters).json()
-    # Convert html to text and calculate embedding values
+    # Calculate embedding values for questions and answers
     for q in data["items"]:
-        q["embedding"] = embeddings.embed_query(q["title"] + " " + q["body_markdown"])
+        question_text = q["title"] + "\n" + q["body_markdown"]
+        q["embedding"] = embeddings.embed_query(question_text)
+        for a in q["answers"]:
+            a["embedding"] = embeddings.embed_query(question_text + "\n" + a["body_markdown"])
+
 
     import_query = """
     UNWIND $data AS q
@@ -93,7 +104,8 @@ def load_so_data(tag: str = "neo4j", page: int = 1) -> None:
         SET answer.is_accepted = a.is_accepted,
             answer.score = a.score,
             answer.creation_date = datetime({epochSeconds:a.creation_date}),
-            answer.body = a.body_markdown
+            answer.body = a.body_markdown,
+            answer.embedding = a.embedding
         MERGE (answerer:User {id:coalesce(a.owner.user_id, "deleted")}) 
         ON CREATE SET answerer.display_name = a.owner.display_name,
                       answerer.reputation= a.owner.reputation
