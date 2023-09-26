@@ -78,7 +78,7 @@ def load_so_data(tag: str = "neo4j", page: int = 1) -> None:
     base_url = "https://api.stackexchange.com/2.3/search/advanced"
     parameters = (
         f"?pagesize=100&page={page}&order=desc&sort=creation&answers=1&tagged={tag}"
-        "&site=stackoverflow&filter=!51dU0b1n(WTdqj5MH1iGsNShY6BhXXwJ)xwV5b"
+        "&site=stackoverflow&filter=!*236eb_eL9rai)MOSNZ-6D3Q6ZKb0buI*IVotWaTb"
     )
     data = requests.get(base_url + parameters).json()
     # Calculate embedding values for questions and answers
