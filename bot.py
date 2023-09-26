@@ -16,8 +16,8 @@ from langchain.prompts.chat import (
     HumanMessagePromptTemplate,
 )
 from langchain.graphs import Neo4jGraph
-
 from dotenv import load_dotenv
+from utils import extract_title_and_question
 
 load_dotenv(".env")
 
@@ -107,14 +107,16 @@ chat_prompt = ChatPromptTemplate.from_messages(
 )
 
 
-def generate_llm_output(user_input: str, callbacks: List[Any]) -> str:
+def generate_llm_output(
+    user_input: str, callbacks: List[Any], prompt=chat_prompt
+) -> str:
     answer = llm(
-        chat_prompt.format_prompt(
+        prompt.format_prompt(
             text=user_input,
         ).to_messages(),
         callbacks=callbacks,
     ).content
-    return {'answer':answer}
+    return {"answer": answer}
 
 
 # Vector response
@@ -211,6 +213,11 @@ styl = f"""
       background: white;
       z-index: 101;
     }}
+
+    /* Generate ticket text area */
+    textarea[aria-label="Description"] {{
+        height: 200px;
+    }}
 </style>
 """
 st.markdown(styl, unsafe_allow_html=True)
@@ -227,7 +234,7 @@ def chat_input():
             stream_handler = StreamHandler(st.empty())
             result = output_function(
                 {"question": user_input, "chat_history": []}, callbacks=[stream_handler]
-            )['answer']
+            )["answer"]
             output = result
             st.session_state[f"user_input"].append(user_input)
             st.session_state[f"generated"].append(output)
@@ -240,11 +247,11 @@ def display_chat():
         st.session_state[f"generated"] = []
 
     if "user_input" not in st.session_state:
-
         st.session_state[f"user_input"] = []
 
     if "rag_mode" not in st.session_state:
         st.session_state[f"rag_mode"] = []
+
     if st.session_state[f"generated"]:
         size = len(st.session_state[f"generated"])
         # Display only the last three exchanges
@@ -256,19 +263,104 @@ def display_chat():
                 st.caption(f"Mode: {st.session_state[f'rag_mode'][i]}")
                 st.write(st.session_state[f"generated"][i])
 
+        with st.expander("Not finding what you're looking for?"):
+            st.write(
+                "Automatically generate a draft for an internal ticket to our support team."
+            )
+            st.button(
+                "Generate ticket",
+                type="primary",
+                key="show_ticket",
+                on_click=open_sidebar,
+            )
+        with st.container():
+            st.write("&nbsp;")
+
 
 def mode_select() -> str:
-    options = ["LLM only", "Vector", "Vector + Graph"]
+    options = ["Disabled", "Enabled"]
     return st.radio("Select RAG mode", options, horizontal=True)
 
 
 name = mode_select()
-if name == "LLM only":
+if name == "LLM only" or name == "Disabled":
     output_function = generate_llm_output
 elif name == "Vector":
     output_function = qa
-elif name == "Vector + Graph":
+elif name == "Vector + Graph" or name == "Enabled":
     output_function = kg_qa
+
+
+def generate_ticket():
+    # Get high ranked questions
+    records = neo4j_graph.query(
+        "MATCH (q:Question) RETURN q.title AS title, q.body AS body ORDER BY q.score DESC LIMIT 3"
+    )
+    questions = []
+    for i, question in enumerate(records, start=1):
+        questions.append((question["title"], question["body"]))
+    # Ask LLM to generate new question in the same style
+    questions_prompt = ""
+    for i, question in enumerate(questions, start=1):
+        questions_prompt += f"{i}. {question[0]}\n"
+        questions_prompt += f"{question[1]}\n\n"
+        questions_prompt += "----\n\n"
+
+    gen_system_template = f"""
+    You're an expert in formulating high quality questions. 
+    Can youformulate a question in the same style, detail and tone as the following example questions?
+    {questions_prompt}
+    ---
+
+    Don't make anything up, only use information in the following question.
+    Return a title for the question, and the question post itself.
+
+    Return example:
+    ---
+    Title: How do I use the Neo4j Python driver?
+    Question: I'm trying to connect to Neo4j using the Python driver, but I'm getting an error.
+    ---
+    
+    Here's the question to rewrite:
+    
+    """
+    # we need jinja2 since the questions themselves contain curly braces
+    system_prompt = SystemMessagePromptTemplate.from_template(
+        gen_system_template, template_format="jinja2"
+    )
+    q_prompt = st.session_state[f"user_input"][-1]
+    chat_prompt = ChatPromptTemplate.from_messages(
+        [system_prompt, HumanMessagePromptTemplate.from_template("{text}")]
+    )
+    llm_response = generate_llm_output(q_prompt, [], chat_prompt)
+    new_title, new_question = extract_title_and_question(llm_response["answer"])
+    return (new_title, new_question)
+
+
+def open_sidebar():
+    st.session_state.open_sidebar = True
+
+
+def close_sidebar():
+    st.session_state.open_sidebar = False
+
+
+if not "open_sidebar" in st.session_state:
+    st.session_state.open_sidebar = False
+if st.session_state.open_sidebar:
+    new_title, new_question = generate_ticket()
+    with st.sidebar:
+        st.title("Ticket draft")
+        st.write("Auto generated draft ticket")
+        st.text_input("Title", new_title)
+        st.text_area("Description", new_question)
+        st.button(
+            "Submit to support team",
+            type="primary",
+            key="submit_ticket",
+            on_click=close_sidebar,
+        )
+
 
 display_chat()
 chat_input()

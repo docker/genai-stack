@@ -77,6 +77,8 @@ services:
       watch:
         - action: rebuild
           path: bot.py
+        - action: rebuild
+          path: utils.py
 
     ports:
       - 8501:8501
