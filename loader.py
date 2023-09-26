@@ -33,7 +33,9 @@ elif embedding_model_name == "openai":
     dimension = 1536
     logger.info("Embedding: Using OpenAI")
 else:
-    embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2", cache_folder="/embedding_model")
+    embeddings = SentenceTransformerEmbeddings(
+        model_name="all-MiniLM-L6-v2", cache_folder="/embedding_model"
+    )
     dimension = 384
     logger.info("Embedding: Using SentenceTransformer")
 
@@ -74,20 +76,36 @@ def create_vector_index(dimension):
 create_vector_index(dimension)
 
 
+so_api_base_url = "https://api.stackexchange.com/2.3/search/advanced"
+
+
 def load_so_data(tag: str = "neo4j", page: int = 1) -> None:
-    base_url = "https://api.stackexchange.com/2.3/search/advanced"
     parameters = (
         f"?pagesize=100&page={page}&order=desc&sort=creation&answers=1&tagged={tag}"
         "&site=stackoverflow&filter=!*236eb_eL9rai)MOSNZ-6D3Q6ZKb0buI*IVotWaTb"
     )
-    data = requests.get(base_url + parameters).json()
+    data = requests.get(so_api_base_url + parameters).json()
+    insert_so_data(data)
+
+
+def load_high_score_so_data() -> None:
+    parameters = (
+        f"?fromdate=1664150400&order=desc&sort=votes&site=stackoverflow&"
+        "filter=!.DK56VBPooplF.)bWW5iOX32Fh1lcCkw1b_Y6Zkb7YD8.ZMhrR5.FRRsR6Z1uK8*Z5wPaONvyII"
+    )
+    data = requests.get(so_api_base_url + parameters).json()
+    insert_so_data(data)
+
+
+def insert_so_data(data: dict) -> None:
     # Calculate embedding values for questions and answers
     for q in data["items"]:
         question_text = q["title"] + "\n" + q["body_markdown"]
         q["embedding"] = embeddings.embed_query(question_text)
         for a in q["answers"]:
-            a["embedding"] = embeddings.embed_query(question_text + "\n" + a["body_markdown"])
-
+            a["embedding"] = embeddings.embed_query(
+                question_text + "\n" + a["body_markdown"]
+            )
 
     import_query = """
     UNWIND $data AS q
@@ -140,18 +158,30 @@ def get_pages():
     return (int(num_pages), int(start_page))
 
 
-st.header("StackOverflow Loader")
-st.subheader("Choose StackOverflow tags to load into Neo4j")
-st.caption("Go to http://localhost:7474/browser/ to explore the graph.")
+def render_page():
+    st.header("StackOverflow Loader")
+    st.subheader("Choose StackOverflow tags to load into Neo4j")
+    st.caption("Go to http://localhost:7474/browser/ to explore the graph.")
 
-user_input = get_tag()
-num_pages, start_page = get_pages()
+    user_input = get_tag()
+    num_pages, start_page = get_pages()
 
-if st.button("Import"):
-    with st.spinner("Loading... This might take a minute or two."):
-        try:
-            for page in range(1, num_pages + 1):
-                load_so_data(user_input, start_page + (page - 1))
-            st.success("Import successful", icon="✅")
-        except Exception as e:
-            st.error(f"Error: {e}", icon="🚨")
+    if st.button("Import", type="primary"):
+        with st.spinner("Loading... This might take a minute or two."):
+            try:
+                for page in range(1, num_pages + 1):
+                    load_so_data(user_input, start_page + (page - 1))
+                st.success("Import successful", icon="✅")
+            except Exception as e:
+                st.error(f"Error: {e}", icon="🚨")
+    with st.expander("Highly ranked questions rather than tags?"):
+        if st.button("Import highly ranked questions"):
+            with st.spinner("Loading... This might take a minute or two."):
+                try:
+                    load_high_score_so_data()
+                    st.success("Import successful", icon="✅")
+                except Exception as e:
+                    st.error(f"Error: {e}", icon="🚨")
+
+
+render_page()
