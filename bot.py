@@ -8,7 +8,8 @@ from langchain.vectorstores.neo4j_vector import Neo4jVector
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.embeddings import OllamaEmbeddings, SentenceTransformerEmbeddings
 from langchain.chat_models import ChatOpenAI, ChatOllama
-from langchain.chains import ConversationalRetrievalChain
+from langchain.chains import RetrievalQAWithSourcesChain
+from langchain.chains.qa_with_sources import load_qa_with_sources_chain
 from langchain.prompts.chat import (
     ChatPromptTemplate,
     SystemMessagePromptTemplate,
@@ -34,6 +35,7 @@ logger = get_logger(__name__)
 
 neo4j_graph = Neo4jGraph(url=url, username=username, password=password)
 
+
 def create_vector_index(dimension: int) -> None:
     index_query = "CALL db.index.vector.createNodeIndex('stackoverflow', 'Question', 'embedding', $dimension, 'cosine')"
     try:
@@ -46,6 +48,7 @@ def create_vector_index(dimension: int) -> None:
     except:  # Already exists
         pass
 
+
 class StreamHandler(BaseCallbackHandler):
     def __init__(self, container, initial_text=""):
         self.container = container
@@ -54,6 +57,7 @@ class StreamHandler(BaseCallbackHandler):
     def on_llm_new_token(self, token: str, **kwargs) -> None:
         self.text += token
         self.container.markdown(self.text)
+
 
 if embedding_model_name == "ollama":
     embeddings = OllamaEmbeddings(base_url=ollama_base_url, model="llama2")
@@ -64,7 +68,9 @@ elif embedding_model_name == "openai":
     dimension = 1536
     logger.info("Embedding: Using OpenAI")
 else:
-    embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2", cache_folder="/embedding_model")
+    embeddings = SentenceTransformerEmbeddings(
+        model_name="all-MiniLM-L6-v2", cache_folder="/embedding_model"
+    )
     dimension = 384
     logger.info("Embedding: Using SentenceTransformer")
 
@@ -75,10 +81,13 @@ if llm_name == "gpt-4":
     logger.info("LLM: Using GPT-4")
 elif llm_name == "ollama":
     llm = ChatOllama(
-        temperature=0, base_url=ollama_base_url, model="llama2", streaming=True,
-        top_k=10, #A higher value (100) will give more diverse answers, while a lower value (10) will be more conservative.
-        top_p=0.3, # Higher value (0.95) will lead to more diverse text, while a lower value (0.5) will generate more focused text.
-        num_ctx=3072 # Sets the size of the context window used to generate the next token. 
+        temperature=0,
+        base_url=ollama_base_url,
+        model="llama2",
+        streaming=True,
+        top_k=10,  # A higher value (100) will give more diverse answers, while a lower value (10) will be more conservative.
+        top_p=0.3,  # Higher value (0.95) will lead to more diverse text, while a lower value (0.5) will generate more focused text.
+        num_ctx=3072,  # Sets the size of the context window used to generate the next token.
     )
     logger.info("LLM: Using Ollama (llama2)")
 else:
@@ -105,7 +114,7 @@ def generate_llm_output(user_input: str, callbacks: List[Any]) -> str:
         ).to_messages(),
         callbacks=callbacks,
     ).content
-    return answer
+    return {'answer':answer}
 
 
 # Vector response
@@ -120,7 +129,7 @@ neo4j_db = Neo4jVector.from_existing_index(
     retrieval_query="""
     OPTIONAL MATCH (node)-[:ANSWERS]->(question)
     RETURN 'Question: ' + question.title + '\n' + question.body + '\nAnswer: ' + 
-            coalesce(node.body,"") + '\nSource: ' + question.link AS text, score, {} AS metadata
+            coalesce(node.body,"") AS text, score, {source:question.link} AS metadata
     ORDER BY score ASC // so that best answer are the last
 """,
 )
@@ -133,7 +142,7 @@ Make sure to rely on information from the answers and not on questions to provid
 When you find particular answer in the context useful, make sure to cite it in the answer using the link.
 If you don't know the answer, just say that you don't know, don't try to make up an answer.
 ----
-{context}
+{summaries}
 ----
 Each answer you generate should contain a section at the end of links to 
 Stackoverflow questions and answers you found useful, which are described under Source value.
@@ -149,10 +158,16 @@ messages = [
 ]
 qa_prompt = ChatPromptTemplate.from_messages(messages)
 
-qa = ConversationalRetrievalChain.from_llm(
+qa_chain = load_qa_with_sources_chain(
     llm,
+    chain_type="stuff",
+    prompt=qa_prompt,
+)
+qa = RetrievalQAWithSourcesChain(
+    combine_documents_chain=qa_chain,
     retriever=neo4j_db.as_retriever(search_kwargs={"k": 2}),
-    combine_docs_chain_kwargs={"prompt": qa_prompt},
+    reduce_k_below_max_tokens=True,
+    max_tokens_limit=3375,
 )
 
 # Vector + Knowledge Graph response
@@ -174,15 +189,16 @@ CALL  { with node
             '\n### Answer (Accepted: '+ a.is_accepted +' Score: ' + a.score+ '): '+  a.body + '\n') as answerTexts
 } 
 RETURN '##Question: ' + node.title + '\n' + node.body + '\n' 
-       + answerTexts + '\nSource: ' + node.link AS text, score, {} AS metadata
+       + answerTexts AS text, score, {source: node.link} AS metadata
 ORDER BY score ASC // so that best answers are the last
 """,
 )
 
-kg_qa = ConversationalRetrievalChain.from_llm(
-    llm,
+kg_qa = RetrievalQAWithSourcesChain(
+    combine_documents_chain=qa_chain,
     retriever=kg.as_retriever(search_kwargs={"k": 2}),
-    combine_docs_chain_kwargs={"prompt": qa_prompt},
+    reduce_k_below_max_tokens=True,
+    max_tokens_limit=3375,
 )
 
 # Streamlit UI
@@ -211,7 +227,7 @@ def chat_input():
             stream_handler = StreamHandler(st.empty())
             result = output_function(
                 {"question": user_input, "chat_history": []}, callbacks=[stream_handler]
-            )
+            )['answer']
             output = result
             st.session_state[f"user_input"].append(user_input)
             st.session_state[f"generated"].append(output)
@@ -250,9 +266,9 @@ name = mode_select()
 if name == "LLM only":
     output_function = generate_llm_output
 elif name == "Vector":
-    output_function = qa.run
+    output_function = qa
 elif name == "Vector + Graph":
-    output_function = kg_qa.run
+    output_function = kg_qa
 
 display_chat()
 chat_input()
