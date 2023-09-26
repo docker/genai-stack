@@ -1,5 +1,12 @@
-version: '3'
 services:
+
+  llm:
+    image: ollama/ollama:latest
+    profiles: ["linux"]
+    ports:
+      - 11434:11434
+    networks:
+      - net
 
   database:
     image: neo4j:5.11
@@ -48,7 +55,9 @@ services:
     x-develop:
       watch:
         - action: rebuild
-          path: loader.py
+          path: .
+          ignore:
+            - bot.py
 
 
   bot:
@@ -76,9 +85,9 @@ services:
     x-develop:
       watch:
         - action: rebuild
-          path: bot.py
-        - action: rebuild
-          path: utils.py
+          path: .
+          ignore:
+            - loader.py
 
     ports:
       - 8501:8501
