@@ -230,7 +230,7 @@ def chat_input():
         with st.chat_message("user"):
             st.write(user_input)
         with st.chat_message("assistant"):
-            st.caption(name)
+            st.caption(f"RAG: {name}")
             stream_handler = StreamHandler(st.empty())
             result = output_function(
                 {"question": user_input, "chat_history": []}, callbacks=[stream_handler]
@@ -260,7 +260,7 @@ def display_chat():
                 st.write(st.session_state[f"user_input"][i])
 
             with st.chat_message("assistant"):
-                st.caption(f"Mode: {st.session_state[f'rag_mode'][i]}")
+                st.caption(f"RAG: {st.session_state[f'rag_mode'][i]}")
                 st.write(st.session_state[f"generated"][i])
 
         with st.expander("Not finding what you're looking for?"):
