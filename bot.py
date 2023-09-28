@@ -191,7 +191,7 @@ ORDER BY similarity ASC // so that best answers are the last
 kg_qa = RetrievalQAWithSourcesChain(
     combine_documents_chain=qa_chain,
     retriever=kg.as_retriever(search_kwargs={"k": 2}),
-    reduce_k_below_max_tokens=True,
+    reduce_k_below_max_tokens=False,
     max_tokens_limit=3375,
 )
 
@@ -303,7 +303,7 @@ def generate_ticket():
 
     gen_system_template = f"""
     You're an expert in formulating high quality questions. 
-    Can youformulate a question in the same style, detail and tone as the following example questions?
+    Can you formulate a question in the same style, detail and tone as the following example questions?
     {questions_prompt}
     ---
 
