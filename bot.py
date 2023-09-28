@@ -79,7 +79,7 @@ create_vector_index(dimension)
 if llm_name == "gpt-4":
     llm = ChatOpenAI(temperature=0, model_name="gpt-4", streaming=True)
     logger.info("LLM: Using GPT-4")
-if llm_name == "gpt-3.5":
+elif llm_name == "gpt-3.5":
     llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo", streaming=True)
     logger.info("LLM: Using GPT-3.5 Turbo")
 elif len(llm_name):
