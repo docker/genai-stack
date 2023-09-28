@@ -1,4 +1,3 @@
-# TODO Langchain base image
 FROM python:latest
 
 WORKDIR /app
@@ -13,9 +12,9 @@ COPY requirements.txt .
 
 RUN pip install --upgrade -r requirements.txt
 
-# COPY .env .
 COPY loader.py .
 COPY utils.py .
+COPY images ./images
 
 EXPOSE 8502
 

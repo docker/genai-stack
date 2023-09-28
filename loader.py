@@ -5,6 +5,7 @@ from langchain.graphs import Neo4jGraph
 import streamlit as st
 from streamlit.logger import get_logger
 from utils import load_embedding_model
+from PIL import Image
 
 load_dotenv(".env")
 
@@ -142,9 +143,10 @@ def get_pages():
 
 
 def render_page():
+    datamodel_image = Image.open("./images/datamodel.png")
     st.header("StackOverflow Loader")
     st.subheader("Choose StackOverflow tags to load into Neo4j")
-    st.caption("Go to http://localhost:7474/browser/ to explore the graph.")
+    st.caption("Go to http://localhost:7474/ to explore the graph.")
 
     user_input = get_tag()
     num_pages, start_page = get_pages()
@@ -155,6 +157,9 @@ def render_page():
                 for page in range(1, num_pages + 1):
                     load_so_data(user_input, start_page + (page - 1))
                 st.success("Import successful", icon="✅")
+                st.caption("Data model")
+                st.image(datamodel_image)
+                st.caption("Go to http://localhost:7474/ to interact with the database")
             except Exception as e:
                 st.error(f"Error: {e}", icon="🚨")
     with st.expander("Highly ranked questions rather than tags?"):

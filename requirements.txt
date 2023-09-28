@@ -6,3 +6,4 @@ tiktoken
 neo4j
 streamlit
 sentence_transformers
+Pillow
