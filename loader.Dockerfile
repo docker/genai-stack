@@ -15,6 +15,7 @@ RUN pip install --upgrade -r requirements.txt
 
 # COPY .env .
 COPY loader.py .
+COPY utils.py .
 
 EXPOSE 8502
 

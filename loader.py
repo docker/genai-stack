@@ -1,16 +1,10 @@
 import os
 import requests
-
 from dotenv import load_dotenv
-from langchain.embeddings import (
-    OllamaEmbeddings,
-    OpenAIEmbeddings,
-    SentenceTransformerEmbeddings,
-)
 from langchain.graphs import Neo4jGraph
-
 import streamlit as st
 from streamlit.logger import get_logger
+from utils import load_embedding_model
 
 load_dotenv(".env")
 
@@ -24,20 +18,9 @@ os.environ["NEO4J_URL"] = url
 
 logger = get_logger(__name__)
 
-if embedding_model_name == "ollama":
-    embeddings = OllamaEmbeddings(base_url=ollama_base_url, model="llama2")
-    dimension = 4096
-    logger.info("Embedding: Using Ollama")
-elif embedding_model_name == "openai":
-    embeddings = OpenAIEmbeddings()
-    dimension = 1536
-    logger.info("Embedding: Using OpenAI")
-else:
-    embeddings = SentenceTransformerEmbeddings(
-        model_name="all-MiniLM-L6-v2", cache_folder="/embedding_model"
-    )
-    dimension = 384
-    logger.info("Embedding: Using SentenceTransformer")
+embeddings, dimension = load_embedding_model(
+    embedding_model_name, config={ollama_base_url: ollama_base_url}, logger=logger
+)
 
 neo4j_graph = Neo4jGraph(url=url, username=username, password=password)
 

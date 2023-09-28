@@ -5,8 +5,7 @@ import streamlit as st
 from streamlit.logger import get_logger
 from langchain.callbacks.base import BaseCallbackHandler
 from langchain.vectorstores.neo4j_vector import Neo4jVector
-from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.embeddings import OllamaEmbeddings, SentenceTransformerEmbeddings
+
 from langchain.chat_models import ChatOpenAI, ChatOllama
 from langchain.chains import RetrievalQAWithSourcesChain
 from langchain.chains.qa_with_sources import load_qa_with_sources_chain
@@ -17,7 +16,7 @@ from langchain.prompts.chat import (
 )
 from langchain.graphs import Neo4jGraph
 from dotenv import load_dotenv
-from utils import extract_title_and_question
+from utils import extract_title_and_question, load_embedding_model
 
 load_dotenv(".env")
 
@@ -27,11 +26,10 @@ password = os.getenv("NEO4J_PASSWORD")
 ollama_base_url = os.getenv("OLLAMA_BASE_URL")
 embedding_model_name = os.getenv("EMBEDDING_MODEL")
 llm_name = os.getenv("LLM")
-
+# Remapping ror Langchain Neo4j integration
 os.environ["NEO4J_URL"] = url
 
 logger = get_logger(__name__)
-
 
 neo4j_graph = Neo4jGraph(url=url, username=username, password=password)
 
@@ -59,20 +57,9 @@ class StreamHandler(BaseCallbackHandler):
         self.container.markdown(self.text)
 
 
-if embedding_model_name == "ollama":
-    embeddings = OllamaEmbeddings(base_url=ollama_base_url, model="llama2")
-    dimension = 4096
-    logger.info("Embedding: Using Ollama")
-elif embedding_model_name == "openai":
-    embeddings = OpenAIEmbeddings()
-    dimension = 1536
-    logger.info("Embedding: Using OpenAI")
-else:
-    embeddings = SentenceTransformerEmbeddings(
-        model_name="all-MiniLM-L6-v2", cache_folder="/embedding_model"
-    )
-    dimension = 384
-    logger.info("Embedding: Using SentenceTransformer")
+embeddings, dimension = load_embedding_model(
+    embedding_model_name, config={ollama_base_url: ollama_base_url}, logger=logger
+)
 
 create_vector_index(dimension)
 
