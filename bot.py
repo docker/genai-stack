@@ -214,9 +214,12 @@ styl = f"""
     /* not great support for :has yet (hello FireFox), but using it for now */
     .element-container:has([aria-label="Select RAG mode"]) {{
       position: fixed;
-      bottom: 115px;
+      bottom: 33px;
       background: white;
       z-index: 101;
+    }}
+    .stChatFloatingInputContainer {{
+        bottom: 20px;
     }}
 
     /* Generate ticket text area */
