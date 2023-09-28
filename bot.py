@@ -185,17 +185,19 @@ kg = Neo4jVector.from_existing_index(
     index_name="stackoverflow",  # vector by default
     text_node_property="body",  # text by default
     retrieval_query="""
-CALL  { with node
-    MATCH (node)<-[:ANSWERS]-(a)
-    WITH a
-    ORDER BY a.is_accepted DESC, a.score DESC
-    WITH collect(a)[..2] as answers
-    RETURN reduce(str='', a IN answers | str + 
-            '\n### Answer (Accepted: '+ a.is_accepted +' Score: ' + a.score+ '): '+  a.body + '\n') as answerTexts
+WITH node AS question, score AS similarity
+CALL  { with question
+    MATCH (question)<-[:ANSWERS]-(answer)
+    WITH answer
+    ORDER BY answer.is_accepted DESC, answer.score DESC
+    WITH collect(answer)[..2] as answers
+    RETURN reduce(str='', answer IN answers | str + 
+            '\n### Answer (Accepted: '+ answer.is_accepted +
+            ' Score: ' + answer.score+ '): '+  answer.body + '\n') as answerTexts
 } 
-RETURN '##Question: ' + node.title + '\n' + node.body + '\n' 
-       + answerTexts AS text, score, {source: node.link} AS metadata
-ORDER BY score ASC // so that best answers are the last
+RETURN '##Question: ' + question.title + '\n' + question.body + '\n' 
+       + answerTexts AS text, similarity as score, {source: question.link} AS metadata
+ORDER BY similarity ASC // so that best answers are the last
 """,
 )
 
