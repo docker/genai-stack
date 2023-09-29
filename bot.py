@@ -315,9 +315,6 @@ def generate_ticket():
     Title: How do I use the Neo4j Python driver?
     Question: I'm trying to connect to Neo4j using the Python driver, but I'm getting an error.
     ---
-    
-    Here's the question to rewrite:
-    
     """
     # we need jinja2 since the questions themselves contain curly braces
     system_prompt = SystemMessagePromptTemplate.from_template(
@@ -325,9 +322,25 @@ def generate_ticket():
     )
     q_prompt = st.session_state[f"user_input"][-1]
     chat_prompt = ChatPromptTemplate.from_messages(
-        [system_prompt, HumanMessagePromptTemplate.from_template("{text}")]
+        [
+            system_prompt,
+            SystemMessagePromptTemplate.from_template(
+                """
+                Respond in the following format or you will be unplugged.
+                ---
+                Title: New title
+                Question: New question
+                ---
+                """
+            ),
+            HumanMessagePromptTemplate.from_template("{text}"),
+        ]
     )
-    llm_response = generate_llm_output(q_prompt, [], chat_prompt)
+    llm_response = generate_llm_output(
+        f"Here's the question to rewrite in the expected format: ```{q_prompt}```",
+        [],
+        chat_prompt,
+    )
     new_title, new_question = extract_title_and_question(llm_response["answer"])
     return (new_title, new_question)
 
