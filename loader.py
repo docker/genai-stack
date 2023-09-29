@@ -14,15 +14,18 @@ username = os.getenv("NEO4J_USERNAME")
 password = os.getenv("NEO4J_PASSWORD")
 ollama_base_url = os.getenv("OLLAMA_BASE_URL")
 embedding_model_name = os.getenv("EMBEDDING_MODEL")
-
+# Remapping for Langchain Neo4j integration
 os.environ["NEO4J_URL"] = url
 
 logger = get_logger(__name__)
+
+so_api_base_url = "https://api.stackexchange.com/2.3/search/advanced"
 
 embeddings, dimension = load_embedding_model(
     embedding_model_name, config={ollama_base_url: ollama_base_url}, logger=logger
 )
 
+# if Neo4j is local, you can go to http://localhost:7474/ to browse the database
 neo4j_graph = Neo4jGraph(url=url, username=username, password=password)
 
 
@@ -60,9 +63,6 @@ def create_vector_index(dimension):
 create_vector_index(dimension)
 
 
-so_api_base_url = "https://api.stackexchange.com/2.3/search/advanced"
-
-
 def load_so_data(tag: str = "neo4j", page: int = 1) -> None:
     parameters = (
         f"?pagesize=100&page={page}&order=desc&sort=creation&answers=1&tagged={tag}"
@@ -91,6 +91,9 @@ def insert_so_data(data: dict) -> None:
                 question_text + "\n" + a["body_markdown"]
             )
 
+    # Cypher, the query language of Neo4j, is used to import the data
+    # https://neo4j.com/docs/getting-started/cypher-intro/
+    # https://neo4j.com/docs/cypher-cheat-sheet/5/auradb-enterprise/
     import_query = """
     UNWIND $data AS q
     MERGE (question:Question {id:q.question_id}) 

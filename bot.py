@@ -26,11 +26,12 @@ password = os.getenv("NEO4J_PASSWORD")
 ollama_base_url = os.getenv("OLLAMA_BASE_URL")
 embedding_model_name = os.getenv("EMBEDDING_MODEL")
 llm_name = os.getenv("LLM")
-# Remapping ror Langchain Neo4j integration
+# Remapping for Langchain Neo4j integration
 os.environ["NEO4J_URL"] = url
 
 logger = get_logger(__name__)
 
+# if Neo4j is local, you can go to http://localhost:7474/ to browse the database
 neo4j_graph = Neo4jGraph(url=url, username=username, password=password)
 
 
