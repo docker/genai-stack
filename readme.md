@@ -1,9 +1,11 @@
-# LangChain Docker Starter Kits
-
+# GenAI Stack
+This GenAI application stack will get you started building your
+own GenAI application in no time.  
+The demo applications can serve as inspiration or as a starting point.
 
 # Configuration
 
-Use an `.env` file for the OPENAI_API_KEY (see `env.example`)
+Create a `.env` file from the environment template file `env.example`
 
 # Develop
 **To start everything**
@@ -31,18 +33,24 @@ docker compose down
 # Applications
 ## App 1 - Support Agent Bot  
 
-UI: http://localhost:8501
+UI: http://localhost:8501  
+DB client: http://localhost:7474
 
 - answer support question based on recent entries
 - provide summarized answers with sources
-- demonstrate difference between
-    - pure LLM
-    - LLM + RAG (vector)
-    - LLM + RAG (vector + knowledge graph context)
-- allow to generate an great SO question for the current conversation based on the style of highly rated questions in the database
+- demonstrate difference between 
+    - RAG Disabled (pure LLM reponse)
+    - RAG Enabled (vector + knowledge graph context)
+- allow to generate a high quality support ticket for the current conversation based on the style of highly rated questions in the database.
 
-![concept, not actual UI](.github/media/app1-concept.png)  
-*(not actual UI, just showing the concept)*
+![](.github/media/app1-rag-selector.png)  
+*(Chat input + RAG mode selector)*
+
+![](.github/media/app1-generate.png)  
+*(CTA to auto generate support ticket draft)*
+
+![](.github/media/app1-ticket.png)  
+*(UI of the auto generated support ticket draft)*
 
 --- 
 
@@ -51,26 +59,10 @@ UI: http://localhost:8501
 UI: http://localhost:8502  
 DB client: http://localhost:7474
 
-- import recent (last weeks/months) SO data for certain tags into a KG
+- import recent SO data for certain tags into a KG
 - embed questions and answers and store in vector index
 - UI: choose tags, run import, see progress, some stats of data in the database
+- Load high ranked questions (regardless of tags) to support the ticket generation feature of App 1.
 
 ![](.github/media/app2-ui-1.png)  
 ![](.github/media/app2-model.png)
-
----
-
-## App 3 Summarization / generation tasks
-
-UI: TBD
-
-- instead of just having the links to the original sources also demonstrate the following on the base data
-- summarized version of the linked question, all it's answers and comments
-    - as a bullet list
-    - as a chain of thought
-    - as a GitHub issue
-    - as a fairy tale (fun)
-    - as a poem (fun)
-    - as a TIL blog post (markdown)
-    - as a report / chart / graph?
-
