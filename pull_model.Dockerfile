@@ -13,7 +13,14 @@ COPY <<EOF pull_model.clj
         url (get (System/getenv) "OLLAMA_BASE_URL")]
     (println (format "pulling ollama model %s using %s" llm url))
     (if (and llm url (not (#{"gpt-4" "gpt-3.5"} llm)))
+
+      ;; ----------------------------------------------------------------------
+      ;; just call `ollama pull` here - create OLLAMA_HOST from OLLAMA_BASE_URL
+      ;; ----------------------------------------------------------------------
+      ;; TODO - this still doesn't show progress properly when run from docker compose
+
       (process/shell {:env {"OLLAMA_HOST" url} :out :inherit :err :inherit} (format "./bin/ollama pull %s" llm))
+
       (println "OLLAMA model only pulled if both LLM and OLLAMA_BASE_URL are set and the LLM model is not gpt")))
   (catch Throwable _ (System/exit 1)))
 EOF
