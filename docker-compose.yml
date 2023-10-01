@@ -8,6 +8,16 @@ services:
     networks:
       - net
 
+  pull-model:
+    image: genai-stack/pull-model:latest
+    build:
+      dockerfile: pull_model.Dockerfile
+    environment:
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL-http://host.docker.internal:11434}
+      - LLM
+    networks:
+      - net
+
   database:
     image: neo4j:5.11
     ports:
@@ -48,6 +58,8 @@ services:
     depends_on:
       database:
         condition: service_healthy
+      pull-model:
+        condition: service_completed_successfully
 
     ports:
       - 8081:8080
@@ -82,6 +94,8 @@ services:
     depends_on:
       database:
         condition: service_healthy
+      pull-model:
+        condition: service_completed_successfully
     x-develop:
       watch:
         - action: rebuild
