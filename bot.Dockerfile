@@ -1,5 +1,4 @@
-# TODO Langchain base image
-FROM python:latest
+FROM langchain/langchain
 
 WORKDIR /app
 

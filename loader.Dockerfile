@@ -1,4 +1,4 @@
-FROM python:latest
+FROM langchain/langchain
 
 WORKDIR /app
 
