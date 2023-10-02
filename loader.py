@@ -4,7 +4,8 @@ from dotenv import load_dotenv
 from langchain.graphs import Neo4jGraph
 import streamlit as st
 from streamlit.logger import get_logger
-from utils import load_embedding_model
+from chains import load_embedding_model
+from utils import create_constraints, create_vector_index
 from PIL import Image
 
 load_dotenv(".env")
@@ -28,39 +29,8 @@ embeddings, dimension = load_embedding_model(
 # if Neo4j is local, you can go to http://localhost:7474/ to browse the database
 neo4j_graph = Neo4jGraph(url=url, username=username, password=password)
 
-
-def create_constraints():
-    neo4j_graph.query(
-        "CREATE CONSTRAINT question_id IF NOT EXISTS FOR (q:Question) REQUIRE (q.id) IS UNIQUE"
-    )
-    neo4j_graph.query(
-        "CREATE CONSTRAINT answer_id IF NOT EXISTS FOR (a:Answer) REQUIRE (a.id) IS UNIQUE"
-    )
-    neo4j_graph.query(
-        "CREATE CONSTRAINT user_id IF NOT EXISTS FOR (u:User) REQUIRE (u.id) IS UNIQUE"
-    )
-    neo4j_graph.query(
-        "CREATE CONSTRAINT tag_name IF NOT EXISTS FOR (t:Tag) REQUIRE (t.name) IS UNIQUE"
-    )
-
-
-create_constraints()
-
-
-def create_vector_index(dimension):
-    index_query = "CALL db.index.vector.createNodeIndex('stackoverflow', 'Question', 'embedding', $dimension, 'cosine')"
-    try:
-        neo4j_graph.query(index_query, {"dimension": dimension})
-    except:  # Already exists
-        pass
-    index_query = "CALL db.index.vector.createNodeIndex('top_answers', 'Answer', 'embedding', $dimension, 'cosine')"
-    try:
-        neo4j_graph.query(index_query, {"dimension": dimension})
-    except:  # Already exists
-        pass
-
-
-create_vector_index(dimension)
+create_constraints(neo4j_graph)
+create_vector_index(neo4j_graph, dimension)
 
 
 def load_so_data(tag: str = "neo4j", page: int = 1) -> None:

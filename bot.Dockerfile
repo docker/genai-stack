@@ -13,9 +13,9 @@ COPY requirements.txt .
 
 RUN pip install --upgrade -r requirements.txt
 
-# COPY .env .
 COPY bot.py .
 COPY utils.py .
+COPY chains.py .
 
 EXPOSE 8501
 
