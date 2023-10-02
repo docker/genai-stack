@@ -1,4 +1,3 @@
-langchain
 openai
 python-dotenv
 wikipedia
