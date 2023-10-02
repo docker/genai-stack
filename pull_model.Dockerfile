@@ -6,7 +6,8 @@ COPY --from=ollama /bin/ollama ./bin/ollama
 
 COPY <<EOF pull_model.clj
 (ns pull-model
-  (:require [babashka.process :as process]))
+  (:require [babashka.process :as process]
+            [clojure.core.async :as async]))
 
 (try
   (let [llm (get (System/getenv) "LLM")
@@ -19,7 +20,12 @@ COPY <<EOF pull_model.clj
       ;; ----------------------------------------------------------------------
       ;; TODO - this still doesn't show progress properly when run from docker compose
 
-      (process/shell {:env {"OLLAMA_HOST" url} :out :inherit :err :inherit} (format "./bin/ollama pull %s" llm))
+      (let [done (async/chan)]
+        (async/go-loop [n 0]
+          (let [[v _] (async/alts! [done (async/timeout 5000)])]
+            (if (= :stop v) :stopped (do (println (format "... pulling model (%ss) - will take several minutes" (* n 10))) (recur (inc n))))))
+        (process/shell {:env {"OLLAMA_HOST" url} :out :inherit :err :inherit} (format "./bin/ollama pull %s" llm))
+        (async/>!! done :stop))
 
       (println "OLLAMA model only pulled if both LLM and OLLAMA_BASE_URL are set and the LLM model is not gpt")))
   (catch Throwable _ (System/exit 1)))
