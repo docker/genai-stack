@@ -6,3 +6,4 @@ neo4j
 streamlit
 sentence_transformers
 Pillow
+PyPDF2
