@@ -79,3 +79,14 @@ DB client: http://localhost:7474
 
 ![](.github/media/app2-ui-1.png)  
 ![](.github/media/app2-model.png)
+
+## App 3 Question / Answer with a local PDF
+UI: http://localhost:8503  
+DB client: http://localhost:7474
+
+This application let's you load a local PDF into text
+chunks and embed it into Neo4j so you can ask questions about
+its contents and have the LLM answer them using vector similarity
+search.
+
+![](.github/media/app3-ui.png)
