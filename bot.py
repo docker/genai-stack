@@ -37,7 +37,7 @@ logger = get_logger(__name__)
 # if Neo4j is local, you can go to http://localhost:7474/ to browse the database
 neo4j_graph = Neo4jGraph(url=url, username=username, password=password)
 embeddings, dimension = load_embedding_model(
-    embedding_model_name, config={ollama_base_url: ollama_base_url}, logger=logger
+    embedding_model_name, config={"ollama_base_url": ollama_base_url}, logger=logger
 )
 create_vector_index(neo4j_graph, dimension)
 
