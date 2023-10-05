@@ -19,7 +19,7 @@ services:
       - net
 
   database:
-    image: neo4j:5.11
+    image: graphstack/dozerdb:5.12.0.0-alpha.1
     ports:
       - 7687:7687
       - 7474:7474
