@@ -1,3 +1,5 @@
+#syntax = docker/dockerfile:1.4
+
 FROM ollama/ollama:latest AS ollama
 FROM babashka/babashka:latest
 
