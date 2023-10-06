@@ -37,7 +37,7 @@ docker compose up --build
 To enter **watch mode** (auto rebuild on file changes).
 First start everything, then in new terminal:
 ```
-docker compose alpha watch
+docker compose watch
 ```
 
 **Shutdown**
