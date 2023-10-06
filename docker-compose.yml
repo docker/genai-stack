@@ -64,7 +64,7 @@ services:
     ports:
       - 8081:8080
       - 8502:8502
-    x-develop:
+    develop:
       watch:
         - action: rebuild
           path: .
