@@ -83,44 +83,52 @@ st.markdown(styl, unsafe_allow_html=True)
 
 
 def chat_input():
-    user_input = st.chat_input("What coding issue can I help you resolve today?")
+    if not (
+        user_input := st.chat_input(
+            "What coding issue can I help you resolve today?"
+        )
+    ):
+        return
+    with st.chat_message("user"):
+        st.write(user_input)
+    with st.chat_message("assistant"):
+        _extracted_from_chat_input_(user_input)
 
-    if user_input:
-        with st.chat_message("user"):
-            st.write(user_input)
-        with st.chat_message("assistant"):
-            st.caption(f"RAG: {name}")
-            stream_handler = StreamHandler(st.empty())
-            result = output_function(
-                {"question": user_input, "chat_history": []}, callbacks=[stream_handler]
-            )["answer"]
-            output = result
-            st.session_state[f"user_input"].append(user_input)
-            st.session_state[f"generated"].append(output)
-            st.session_state[f"rag_mode"].append(name)
+
+# TODO Rename this here and in `chat_input`
+def _extracted_from_chat_input_(user_input):
+    st.caption(f"RAG: {name}")
+    stream_handler = StreamHandler(st.empty())
+    result = output_function(
+        {"question": user_input, "chat_history": []}, callbacks=[stream_handler]
+    )["answer"]
+    output = result
+    st.session_state["user_input"].append(user_input)
+    st.session_state["generated"].append(output)
+    st.session_state["rag_mode"].append(name)
 
 
 def display_chat():
     # Session state
     if "generated" not in st.session_state:
-        st.session_state[f"generated"] = []
+        st.session_state["generated"] = []
 
     if "user_input" not in st.session_state:
-        st.session_state[f"user_input"] = []
+        st.session_state["user_input"] = []
 
     if "rag_mode" not in st.session_state:
-        st.session_state[f"rag_mode"] = []
+        st.session_state["rag_mode"] = []
 
-    if st.session_state[f"generated"]:
-        size = len(st.session_state[f"generated"])
+    if st.session_state["generated"]:
+        size = len(st.session_state["generated"])
         # Display only the last three exchanges
         for i in range(max(size - 3, 0), size):
             with st.chat_message("user"):
-                st.write(st.session_state[f"user_input"][i])
+                st.write(st.session_state["user_input"][i])
 
             with st.chat_message("assistant"):
-                st.caption(f"RAG: {st.session_state[f'rag_mode'][i]}")
-                st.write(st.session_state[f"generated"][i])
+                st.caption(f"RAG: {st.session_state['rag_mode'][i]}")
+                st.write(st.session_state["generated"][i])
 
         with st.expander("Not finding what you're looking for?"):
             st.write(
@@ -142,9 +150,9 @@ def mode_select() -> str:
 
 
 name = mode_select()
-if name == "LLM only" or name == "Disabled":
+if name in ["LLM only", "Disabled"]:
     output_function = llm_chain
-elif name == "Vector + Graph" or name == "Enabled":
+elif name in ["Vector + Graph", "Enabled"]:
     output_function = rag_chain
 
 
@@ -153,9 +161,10 @@ def generate_ticket():
     records = neo4j_graph.query(
         "MATCH (q:Question) RETURN q.title AS title, q.body AS body ORDER BY q.score DESC LIMIT 3"
     )
-    questions = []
-    for i, question in enumerate(records, start=1):
-        questions.append((question["title"], question["body"]))
+    questions = [
+        (question["title"], question["body"])
+        for i, question in enumerate(records, start=1)
+    ]
     # Ask LLM to generate new question in the same style
     questions_prompt = ""
     for i, question in enumerate(questions, start=1):
@@ -182,7 +191,7 @@ def generate_ticket():
     system_prompt = SystemMessagePromptTemplate.from_template(
         gen_system_template, template_format="jinja2"
     )
-    q_prompt = st.session_state[f"user_input"][-1]
+    q_prompt = st.session_state["user_input"][-1]
     chat_prompt = ChatPromptTemplate.from_messages(
         [
             system_prompt,
@@ -215,7 +224,7 @@ def close_sidebar():
     st.session_state.open_sidebar = False
 
 
-if not "open_sidebar" in st.session_state:
+if "open_sidebar" not in st.session_state:
     st.session_state.open_sidebar = False
 if st.session_state.open_sidebar:
     new_title, new_question = generate_ticket()
