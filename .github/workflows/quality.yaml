@@ -12,7 +12,7 @@ jobs:
       with:
         python-version: '3.9'
     - name: Install dependencies
-      run: pip install -r requirements.txt
+      run: pip install -r black
     - name: Run black check
       run: python3 -m black --check .
   flake8:
@@ -24,6 +24,6 @@ jobs:
       with:
         python-version: '3.9'
     - name: Install dependencies
-      run: pip install -r requirements.txt
+      run: pip install flake8
     - name: Run flake8 check
       run: python3 -m flake8 --count .
