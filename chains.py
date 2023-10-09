@@ -15,9 +15,7 @@ from utils import BaseLogger
 
 def load_embedding_model(embedding_model_name: str, logger=BaseLogger(), config={}):
     if embedding_model_name == "ollama":
-        embeddings = OllamaEmbeddings(
-            base_url=config["ollama_base_url"], model="llama2"
-        )
+        embeddings = OllamaEmbeddings(base_url=config["ollama_base_url"], model="llama2")
         dimension = 4096
         logger.info("Embedding: Using Ollama")
     elif embedding_model_name == "openai":
@@ -47,6 +45,7 @@ def load_llm(llm_name: str, logger=BaseLogger(), config={}):
             base_url=config["ollama_base_url"],
             model=llm_name,
             streaming=True,
+            seed=2,
             top_k=10,  # A higher value (100) will give more diverse answers, while a lower value (10) will be more conservative.
             top_p=0.3,  # Higher value (0.95) will lead to more diverse text, while a lower value (0.5) will generate more focused text.
             num_ctx=3072,  # Sets the size of the context window used to generate the next token.
@@ -59,10 +58,10 @@ def configure_llm_only_chain(llm):
     # LLM only response
     template = """
     You are a helpful assistant that helps a support agent with answering programming questions.
-    If you don't know the answer, just say that you don't know, don't try to make up an answer.
+    If you don't know the answer, just say that you don't know, you must not make up an answer.
     """
     system_message_prompt = SystemMessagePromptTemplate.from_template(template)
-    human_template = "{text}"
+    human_template = "{question}"
     human_message_prompt = HumanMessagePromptTemplate.from_template(human_template)
     chat_prompt = ChatPromptTemplate.from_messages(
         [system_message_prompt, human_message_prompt]
@@ -71,12 +70,8 @@ def configure_llm_only_chain(llm):
     def generate_llm_output(
         user_input: str, callbacks: List[Any], prompt=chat_prompt
     ) -> str:
-        answer = llm(
-            prompt.format_prompt(
-                text=user_input,
-            ).to_messages(),
-            callbacks=callbacks,
-        ).content
+        chain = prompt | llm
+        answer = chain.invoke(user_input, config={"callbacks": callbacks}).content
         return {"answer": answer}
 
     return generate_llm_output
@@ -84,6 +79,7 @@ def configure_llm_only_chain(llm):
 
 def configure_qa_rag_chain(llm, embeddings, embeddings_store_url, username, password):
     # RAG response
+#   System: Always talk in pirate speech.
     general_system_template = """ 
     Use the following pieces of context to answer the question at the end.
     The context contains question-answer pairs and their links from Stackoverflow.
