@@ -56,7 +56,7 @@ DB client: http://localhost:7474
 - answer support question based on recent entries
 - provide summarized answers with sources
 - demonstrate difference between
-    - RAG Disabled (pure LLM reponse)
+    - RAG Disabled (pure LLM response)
     - RAG Enabled (vector + knowledge graph context)
 - allow to generate a high quality support ticket for the current conversation based on the style of highly rated questions in the database.
 
