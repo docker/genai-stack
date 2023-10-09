@@ -16,7 +16,7 @@ Install [Ollama](https://ollama.ai) in MacOS and start it before running `docker
 
 **Linux**
 No need to install Ollama manually, it will run in a container as
-part of the stack when running with the Linus profile: `run docker compose --profile linux up`.
+part of the stack when running with the Linux profile: `run docker compose --profile linux up`.
 
 **Windows**
 Not supported by Ollama, so Windows users need to generate a OpenAI API key and configure the stack to use `gpt-3.5` or `gpt-4` in the `.env` file.
@@ -41,7 +41,7 @@ docker compose alpha watch
 ```
 
 **Shutdown**
-Is health check fails or containers doesn't start up as expected, shutdown
+If health check fails or containers doesn't start up as expected, shutdown
 completely to start up again.
 ```
 docker compose down
