@@ -88,7 +88,7 @@ DB client: http://localhost:7474
 UI: http://localhost:8503  
 DB client: http://localhost:7474
 
-This application let's you load a local PDF into text
+This application lets you load a local PDF into text
 chunks and embed it into Neo4j so you can ask questions about
 its contents and have the LLM answer them using vector similarity
 search.
