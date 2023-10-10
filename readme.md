@@ -41,7 +41,7 @@ docker compose alpha watch
 ```
 
 **Shutdown**
-Is health check fails or containers doesn't start up as expected, shutdown
+If health check fails or containers don't start up as expected, shutdown
 completely to start up again.
 ```
 docker compose down
