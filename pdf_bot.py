@@ -31,7 +31,7 @@ logger = get_logger(__name__)
 
 
 embeddings, dimension = load_embedding_model(
-    embedding_model_name, config={ollama_base_url: ollama_base_url}, logger=logger
+    embedding_model_name, config={"ollama_base_url": ollama_base_url}, logger=logger
 )
 
 
