@@ -16,7 +16,7 @@ Install [Ollama](https://ollama.ai) in MacOS and start it before running `docker
 
 **Linux**
 No need to install Ollama manually, it will run in a container as
-part of the stack when running with the Linus profile: `run docker compose up --profile linux`.
+part of the stack when running with the Linux profile: run `docker compose up --profile linux`.
 
 **Windows**
 Not supported by Ollama, so Windows users need to generate a OpenAI API key and configure the stack to use `gpt-3.5` or `gpt-4` in the `.env` file.
@@ -41,7 +41,7 @@ docker compose alpha watch
 ```
 
 **Shutdown**
-Is health check fails or containers doesn't start up as expected, shutdown
+If health check fails or containers don't start up as expected, shutdown
 completely to start up again.
 ```
 docker compose down
@@ -56,7 +56,7 @@ DB client: http://localhost:7474
 - answer support question based on recent entries
 - provide summarized answers with sources
 - demonstrate difference between
-    - RAG Disabled (pure LLM reponse)
+    - RAG Disabled (pure LLM response)
     - RAG Enabled (vector + knowledge graph context)
 - allow to generate a high quality support ticket for the current conversation based on the style of highly rated questions in the database.
 
@@ -88,7 +88,7 @@ DB client: http://localhost:7474
 UI: http://localhost:8503  
 DB client: http://localhost:7474
 
-This application let's you load a local PDF into text
+This application lets you load a local PDF into text
 chunks and embed it into Neo4j so you can ask questions about
 its contents and have the LLM answer them using vector similarity
 search.
