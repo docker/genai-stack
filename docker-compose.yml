@@ -3,8 +3,6 @@ services:
   llm:
     image: ollama/ollama:latest
     profiles: ["linux"]
-    ports:
-      - 11434:11434
     networks:
       - net
 
@@ -40,6 +38,9 @@ services:
   loader:
     build:
       dockerfile: loader.Dockerfile
+    ports:
+      - 8081:8080
+      - 8502:8502
     volumes:
       - $PWD/embedding_model:/embedding_model
     environment:
@@ -60,10 +61,6 @@ services:
         condition: service_healthy
       pull-model:
         condition: service_completed_successfully
-
-    ports:
-      - 8081:8080
-      - 8502:8502
     x-develop:
       watch:
         - action: rebuild
@@ -76,6 +73,8 @@ services:
   bot:
     build:
       dockerfile: bot.Dockerfile
+    ports:
+      - 8501:8501
     volumes:
       - $PWD/embedding_model:/embedding_model
     environment:
@@ -105,13 +104,11 @@ services:
             - loader.py
             - pdf_bot.py
 
-    ports:
-      - 8501:8501
-
-
   pdf_bot:
     build:
       dockerfile: pdf_bot.Dockerfile
+    ports:
+      - 8503:8503
     environment:
       - NEO4J_URI=${NEO4J_URI-neo4j://database:7687}
       - NEO4J_PASSWORD=${NEO4J_PASSWORD-password}
@@ -138,9 +135,6 @@ services:
           ignore:
             - loader.py
             - bot.py
-
-    ports:
-      - 8503:8503
 
 networks:
   net:
