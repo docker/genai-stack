@@ -1,48 +1,49 @@
-name: AUTOGPT
+name: runbot
 on:
-  workflow_dispatch :   #only run when requested
-  # comment out the next 2 lines to stop processing new inputs
-  #issue_comment:
-  #  types: [created]
+ workflow_dispatch :   #only run when requested
+   inputs:
+    ai_name :
+      type: string
+      required: true
+    ai_role:
+      type: string
+      required: true
+    ai_goal_count:
+      default : '4'
+      type: string
+      required: true
+    ai_goal_1:
+      type: string
+      required: true
+    ai_goal_2:
+      type: string
+    ai_goal_3:
+      type: string
+    ai_goal_4:
+      type: string
 
 jobs:
-  printEnv:
-    if: ${{ startsWith( github.event.comment.body, '/agent-action')}}
-    permissions: write-all
-      # repository:write      
-    name: Print env
+  run_bot:    
     runs-on: ubuntu-latest
     steps:
-      - name: Dump GitHub context
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_CONTEXT: ${{ toJson (github) }}
-          GITHUB_USER: ${{ github.event.comment.user.login }}
-          GITHUB_REPO: ${{ github.repository }}
-        run: |
-          echo USER "$GITHUB_USER"
-          echo USER "$GITHUB_REPO"
-          echo ACTOR    "${{ github.actor }}"
-          echo TRIGGER  "${{ github.triggering_actor }}"
-          echo LOGIN    "${{ github.event.comment.user.login }}"
+    - name: Print GitHub context
+      env: 
+        GITHUB_CONTEXT: ${{ toJson(github) }}
+      run: echo GITHUB_CONTEXT:$GITHUB_CONTEXT
+    
+    - uses: meta-introspector/checkout@v3.6.0
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
 
-  runJob:
-    if: ${{ startsWith( github.event.comment.body, '/agent-action')}}
-    permissions: write-all
-    name: Runevent
-    runs-on: ubuntu-latest
-    steps:
-      - name: run gh workflow
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_CONTEXT: ${{ toJson (github) }}
-          GITHUB_USER: ${{ github.event.comment.user.login }}
-          GITHUB_REPO: ${{ github.repository }}
-          COMMENT_BODY: $${{ github.event.comment.body }}
-        run: |
-          echo TEST ${{ contains(fromJson('["nektos/act", "jmikedupont2", "Mysticmarks"]'), github.actor ) }}
-          echo USER "$GITHUB_USER"
-          echo USER "$GITHUB_REPO"
-          echo ACTOR    "${{ github.actor }}"
-
+    - name: Run autogpt in docker with mock openai server
+      run: docker-compose up --no-build  --abort-on-container-exit
+      env:
+        AI_NAME: "'${{ inputs.ai_name }}'"
+        AI_ROLE: "'${{ inputs.ai_role }}'"
+        AI_GOAL_1: "'${{ inputs.ai_goal_1 }}'"
+        AI_GOAL_2: "'${{ inputs.ai_goal_2 }}'"
+        AI_GOAL_3: "'${{ inputs.ai_goal_3 }}'"
+        AI_GOAL_4: "'${{ inputs.ai_goal_4 }}'"
+        AI_GOAL_COUNT: "${{ inputs.ai_goal_count }}"
+        GITHUB_PAT: ${{ secrets.PAT }}
+        GITHUB_REPO: ${{ github.repository }}
