@@ -1,0 +1,48 @@
+name: AUTOGPT
+on:
+  workflow_dispatch :   #only run when requested
+  # comment out the next 2 lines to stop processing new inputs
+  #issue_comment:
+  #  types: [created]
+
+jobs:
+  printEnv:
+    if: ${{ startsWith( github.event.comment.body, '/agent-action')}}
+    permissions: write-all
+      # repository:write      
+    name: Print env
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_CONTEXT: ${{ toJson (github) }}
+          GITHUB_USER: ${{ github.event.comment.user.login }}
+          GITHUB_REPO: ${{ github.repository }}
+        run: |
+          echo USER "$GITHUB_USER"
+          echo USER "$GITHUB_REPO"
+          echo ACTOR    "${{ github.actor }}"
+          echo TRIGGER  "${{ github.triggering_actor }}"
+          echo LOGIN    "${{ github.event.comment.user.login }}"
+
+  runJob:
+    if: ${{ startsWith( github.event.comment.body, '/agent-action')}}
+    permissions: write-all
+    name: Runevent
+    runs-on: ubuntu-latest
+    steps:
+      - name: run gh workflow
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_CONTEXT: ${{ toJson (github) }}
+          GITHUB_USER: ${{ github.event.comment.user.login }}
+          GITHUB_REPO: ${{ github.repository }}
+          COMMENT_BODY: $${{ github.event.comment.body }}
+        run: |
+          echo TEST ${{ contains(fromJson('["nektos/act", "jmikedupont2", "Mysticmarks"]'), github.actor ) }}
+          echo USER "$GITHUB_USER"
+          echo USER "$GITHUB_REPO"
+          echo ACTOR    "${{ github.actor }}"
+
