@@ -119,7 +119,7 @@
             {/each}
         </div>
         <div class="text-sm w-full fixed bottom-16">
-            <div class="shadow-lg bg-indigo-50 rounded-lg w-1/2 mx-auto">
+            <div class="shadow-lg bg-indigo-50 rounded-lg w-4/5 xl:w-2/3 2xl:w-1/2 mx-auto">
                 <div class="rounded-t-lg px-4 py-2 font-light">
                     <div class="font-semibold">RAG mode</div>
                     <div class="">
