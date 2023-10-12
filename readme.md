@@ -53,11 +53,13 @@ Here's what's in this repo:
 
 | Name | Main files | Compose name | URLs | Description |
 |---|---|---|---|---|
-| Code support bot | `bot.py` | `bot` | http://localhost:8501 | Main usecase. Fullstack Python application. |
+| Support Bot | `bot.py` | `bot` | http://localhost:8501 | Main usecase. Fullstack Python application. |
 | Stack Overflow Loader | `loader.py` | `loader` | http://localhost:8502 | Load SO data into the database (create vector embeddings etc). Fullstack Python application. |
 | PDF Reader | `pdf_bot.py` | `pdf_bot` | http://localhost:8503 | Read local PDF and ask it questions. Fullstack Python application. |
 | Standalone Bot API | `api.py` | `api` | http://localhost:8504 | Standalone HTTP API streaming (SSE) + non-streaming endpoints. Python. |
-| Standalone UI | `front-end/` | `front-end` | http://localhost:8505 | Standalone client that uses the Standalone Bot API to interact with the model. JavaScript (Svelte) front-end. |
+| Standalone Bot UI | `front-end/` | `front-end` | http://localhost:8505 | Standalone client that uses the Standalone Bot API to interact with the model. JavaScript (Svelte) front-end. |
+
+The database can be explored at http://localhost:7474.
 
 ## App 1 - Support Agent Bot
 
@@ -113,6 +115,11 @@ search.
 Endpoints: 
   - http://localhost:8504/query?text=hello&rag=false (non streaming)
   - http://localhost:8504/query-stream?text=hello&rag=false (SSE streaming)
+
+Example cURL command:
+```bash
+curl http://localhost:8504/query-stream\?text\=minimal%20hello%20world%20in%20python\&rag\=false
+```
 
 Exposes the functionality to answer questions in the same way as App 1 above. Uses
 same code and prompts.
