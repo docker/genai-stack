@@ -4,4 +4,11 @@
     export let text = "";
 </script>
 
-[<a {href} {title}>{text}</a>]
+<a target="_blank" rel="noreferrer" {href} {title}>{text}</a>
+
+<style>
+    a {
+        color: #007bff;
+        text-decoration: none;
+    }
+</style>
