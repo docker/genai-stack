@@ -1,20 +1,32 @@
 services:
 
-  llm:
-    image: ollama/ollama:latest
-    profiles: ["linux"]
-    ports:
-      - 11434:11434
-    networks:
-      - net
+  # llm:
+  #   image: ollama/ollama:latest
+  #   profiles: ["linux"]
+  #   ports:
+  #     - 11434:11434
+  #   networks:
+  #     - net
 
-  pull-model:
-    image: genai-stack/pull-model:latest
+  # pull-model:
+  #   image: genai-stack/pull-model:latest
+  #   build:
+  #     dockerfile: pull_model.Dockerfile
+  #     context: .
+  #   environment:
+  #     - OLLAMA_BASE_URL=${OLLAMA_BASE_URL-http://host.docker.internal:11434}
+  #     - LLM
+  #   networks:
+  #     - net
+ 
+  api_smith_langchain:
     build:
-      dockerfile: pull_model.Dockerfile
-    environment:
-      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL-http://host.docker.internal:11434}
-      - LLM
+      dockerfile: Dockerfile
+      context: vendor/langsmith-sdk/server/
+      args:
+        BASE_IMAGE: h4ckermike/poetry_base
+    #ports:
+      #- 7688:7688
     networks:
       - net
 
@@ -37,47 +49,49 @@ services:
     networks:
       - net
 
-  loader:
-    build:
-      dockerfile: loader.Dockerfile
-    volumes:
-      - $PWD/embedding_model:/embedding_model
-    environment:
-      - NEO4J_URI=${NEO4J_URI-neo4j://database:7687}
-      - NEO4J_PASSWORD=${NEO4J_PASSWORD-password}
-      - NEO4J_USERNAME=${NEO4J_USERNAME-neo4j}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL-http://host.docker.internal:11434}
-      - EMBEDDING_MODEL=${EMBEDDING_MODEL-sentence_transformer}
-      - LANGCHAIN_ENDPOINT=${LANGCHAIN_ENDPOINT-"https://api.smith.langchain.com"}
-      - LANGCHAIN_TRACING_V2=${LANGCHAIN_TRACING_V2-false}
-      - LANGCHAIN_PROJECT=${LANGCHAIN_PROJECT}
-      - LANGCHAIN_API_KEY=${LANGCHAIN_API_KEY}
-    networks:
-      - net
-    depends_on:
-      database:
-        condition: service_healthy
-      pull-model:
-        condition: service_completed_successfully
+#   loader:
+#     build:
+#       dockerfile: loader.Dockerfile
+#       context: .
+#     volumes:
+#       - $PWD/embedding_model:/embedding_model
+#     environment:
+#       - NEO4J_URI=${NEO4J_URI-neo4j://database:7687}
+#       - NEO4J_PASSWORD=${NEO4J_PASSWORD-password}
+#       - NEO4J_USERNAME=${NEO4J_USERNAME-neo4j}
+#       - OPENAI_API_KEY=${OPENAI_API_KEY}
+# #      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL-http://host.docker.internal:11434}
+#       - EMBEDDING_MODEL=${EMBEDDING_MODEL-sentence_transformer}
+#       - LANGCHAIN_ENDPOINT=api_smith_langchain
+#       - LANGCHAIN_TRACING_V2=true
+#       - LANGCHAIN_PROJECT="fake"
+#       - LANGCHAIN_API_KEY="fake"
+#     networks:
+#       - net
+#     depends_on:
+#       database:
+#         condition: service_healthy
+#       pull-model:
+#         condition: service_completed_successfully
 
-    ports:
-      - 8081:8080
-      - 8502:8502
-    x-develop:
-      watch:
-        - action: rebuild
-          path: .
-          ignore:
-            - bot.py
-            - pdf_bot.py
-            - api.py
-            - front-end/
+#     ports:
+#       - 8081:8080
+#       - 8502:8502
+#     x-develop:
+#       watch:
+#         - action: rebuild
+#           path: .
+#           ignore:
+#             - bot.py
+#             - pdf_bot.py
+#             - api.py
+#             - front-end/
 
 
   bot:
     build:
       dockerfile: bot.Dockerfile
+      context: .
     volumes:
       - $PWD/embedding_model:/embedding_model
     environment:
@@ -85,7 +99,7 @@ services:
       - NEO4J_PASSWORD=${NEO4J_PASSWORD-password}
       - NEO4J_USERNAME=${NEO4J_USERNAME-neo4j}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL-http://host.docker.internal:11434}
+#      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL-http://host.docker.internal:11434}
       - LLM=${LLM-llama2}
       - EMBEDDING_MODEL=${EMBEDDING_MODEL-sentence_transformer}
       - LANGCHAIN_ENDPOINT=${LANGCHAIN_ENDPOINT-"https://api.smith.langchain.com"}
@@ -97,8 +111,8 @@ services:
     depends_on:
       database:
         condition: service_healthy
-      pull-model:
-        condition: service_completed_successfully
+      #pull-model:
+      #  condition: service_completed_successfully
     x-develop:
       watch:
         - action: rebuild
@@ -116,12 +130,13 @@ services:
   pdf_bot:
     build:
       dockerfile: pdf_bot.Dockerfile
+      context: .
     environment:
       - NEO4J_URI=${NEO4J_URI-neo4j://database:7687}
       - NEO4J_PASSWORD=${NEO4J_PASSWORD-password}
       - NEO4J_USERNAME=${NEO4J_USERNAME-neo4j}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL-http://host.docker.internal:11434}
+#      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL-http://host.docker.internal:11434}
       - LLM=${LLM-llama2}
       - EMBEDDING_MODEL=${EMBEDDING_MODEL-sentence_transformer}
       - LANGCHAIN_ENDPOINT=${LANGCHAIN_ENDPOINT-"https://api.smith.langchain.com"}
@@ -133,8 +148,8 @@ services:
     depends_on:
       database:
         condition: service_healthy
-      pull-model:
-        condition: service_completed_successfully
+      #pull-model:
+      #  condition: service_completed_successfully
     x-develop:
       watch:
         - action: rebuild
@@ -150,6 +165,7 @@ services:
   api:
     build:
       dockerfile: api.Dockerfile
+      context: .
     volumes:
       - $PWD/embedding_model:/embedding_model
     environment:
@@ -157,7 +173,7 @@ services:
       - NEO4J_PASSWORD=${NEO4J_PASSWORD-password}
       - NEO4J_USERNAME=${NEO4J_USERNAME-neo4j}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL-http://host.docker.internal:11434}
+#      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL-http://host.docker.internal:11434}
       - LLM=${LLM-llama2}
       - EMBEDDING_MODEL=${EMBEDDING_MODEL-sentence_transformer}
       - LANGCHAIN_ENDPOINT=${LANGCHAIN_ENDPOINT-"https://api.smith.langchain.com"}
@@ -181,25 +197,26 @@ services:
     ports:
       - 8504:8504
 
-  front-end:
-    build:
-      dockerfile: front-end.Dockerfile
-    x-develop:
-      watch:
-        - action: sync
-          path: ./front-end
-          target: /app
-          ignore:
-            - ./front-end/node_modules/
-        - action: rebuild
-          path: ./front-end/package.json
-    depends_on:
-      api:
-        condition: service_healthy
-    networks:
-      - net
-    ports:
-      - 8505:8505
+  # front-end:
+  #   build:
+  #     dockerfile: front-end.Dockerfile
+  #     context: .
+  #   x-develop:
+  #     watch:
+  #       - action: sync
+  #         path: ./front-end
+  #         target: /app
+  #         ignore:
+  #           - ./front-end/node_modules/
+  #       - action: rebuild
+  #         path: ./front-end/package.json
+  #   depends_on:
+  #     api:
+  #       condition: service_healthy
+  #   networks:
+  #     - net
+  #   ports:
+  #     - 8505:8505
 
 networks:
   net:

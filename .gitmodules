@@ -1,0 +1,3 @@
+[submodule "vendor/langsmith-sdk"]
+	path = vendor/langsmith-sdk
+	url = https://github.com/meta-introspector/langsmith-sdk
