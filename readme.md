@@ -8,19 +8,19 @@ The demo applications can serve as inspiration or as a starting point.
 Create a `.env` file from the environment template file `env.example`
 
 Available variables:
-| Variable Name          | Default value                                                         | Description
-|------------------------|-----------------------------------------------------------------------|-------------------------------------
-| OLLAMA_BASE_URL        | http://host.docker.internal:11434                                     | REQUIRED - URL to Ollama LLM API
-| NEO4J_URI              | neo4j://database:7687                                                 | REQUIRED - URL to Neo4j database
-| NEO4J_USERNAME         | neo4j                                                                 | REQUIRED - Username for Neo4j database
-| NEO4J_PASSWORD         | password                                                              | REQUIRED - Password for Neo4j database
-| LLM                    | llama2                                                                | REQUIRED - Can be any Ollama model tag, or gpt-4 or gpt-3.5 
-| OPENAI_API_KEY         |                                                                       | REQUIRED - Only if LLM=gpt-4 or LLM=gpt-3.5
-| EMBEDDING_MODEL        | sentence_transformer                                                  | REQUIRED - Can be sentence_transformer, openai or ollama
-| LANGCHAIN_ENDPOINT     | "https://api.smith.langchain.com"                                     | OPTIONAL - URL to Langchain Smith API
-| LANGCHAIN_TRACING_V2   | false                                                                 | OPTIONAL - Enable Langchain tracing v2
-| LANGCHAIN_PROJECT      |                                                                       | OPTIONAL - Langchain project name
-| LANGCHAIN_API_KEY      |                                                                       | OPTIONAL - Langchain API key
+| Variable Name          | Default value                      | Description                                                 |
+|------------------------|------------------------------------|-------------------------------------------------------------|
+| OLLAMA_BASE_URL        | http://host.docker.internal:11434  | REQUIRED - URL to Ollama LLM API                            |   
+| NEO4J_URI              | neo4j://database:7687              | REQUIRED - URL to Neo4j database                            |
+| NEO4J_USERNAME         | neo4j                              | REQUIRED - Username for Neo4j database                      |
+| NEO4J_PASSWORD         | password                           | REQUIRED - Password for Neo4j database                      |
+| LLM                    | llama2                             | REQUIRED - Can be any Ollama model tag, or gpt-4 or gpt-3.5 | 
+| OPENAI_API_KEY         |                                    | REQUIRED - Only if LLM=gpt-4 or LLM=gpt-3.5                 |
+| EMBEDDING_MODEL        | sentence_transformer               | REQUIRED - Can be sentence_transformer, openai or ollama    |
+| LANGCHAIN_ENDPOINT     | "https://api.smith.langchain.com"  | OPTIONAL - URL to Langchain Smith API                       |
+| LANGCHAIN_TRACING_V2   | false                              | OPTIONAL - Enable Langchain tracing v2                      |
+| LANGCHAIN_PROJECT      |                                    | OPTIONAL - Langchain project name                           |
+| LANGCHAIN_API_KEY      |                                    | OPTIONAL - Langchain API key                                |
 
 ## LLM Configuration
 MacOS and Linux users can use any LLM that's available via Ollama. Check the "tags" section under the model page you want to use on https://ollama.ai/library and write the tag for the value of the environment variable `LLM=` in th e`.env` file.
