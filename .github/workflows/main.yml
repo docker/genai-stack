@@ -3,9 +3,11 @@ on:
  workflow_dispatch :   #only run when requested
    inputs:
     ai_name :
+      default: "genai-stack-bot"
       type: string
       required: true
     ai_role:
+      default: "docker and langchain expert"
       type: string
       required: true
     ai_goal_count:
@@ -13,13 +15,17 @@ on:
       type: string
       required: true
     ai_goal_1:
+      default: "Create a dockerfile"
       type: string
       required: true
     ai_goal_2:
+      default: "Create a github action"
       type: string
     ai_goal_3:
+      default: "Read parameters from inputs"
       type: string
     ai_goal_4:
+      default: "Use github artifacts as inputs"
       type: string
 
 jobs:
