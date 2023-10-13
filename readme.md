@@ -28,7 +28,7 @@ MacOS and Linux users can use any LLM that's available via Ollama. Check the "ta
 All platforms can use GPT-3.5-turbo and GPT-4 (bring your own API keys for OpenAIs models).
 
 **MacOS**
-Install [Ollama](https://ollama.ai) in MacOS and start it before running `docker compose up`.
+Install [Ollama](https://ollama.ai) on MacOS and start it before running `docker compose up`.
 
 **Linux**
 No need to install Ollama manually, it will run in a container as
@@ -46,7 +46,7 @@ Not supported by Ollama, so Windows users need to generate a OpenAI API key and 
 ```
 docker compose up
 ```
-If changes to build scripts has been made, **rebuild**
+If changes to build scripts has been made, **rebuild**.
 ```
 docker compose up --build
 ```
@@ -100,12 +100,12 @@ DB client: http://localhost:7474
 
 ---
 
-##  App 2 Loader
+##  App 2 - Loader
 
 UI: http://localhost:8502
 DB client: http://localhost:7474
 
-- import recent SO data for certain tags into a KG
+- import recent Stack Overflow data for certain tags into a KG
 - embed questions and answers and store in vector index
 - UI: choose tags, run import, see progress, some stats of data in the database
 - Load high ranked questions (regardless of tags) to support the ticket generation feature of App 1.
