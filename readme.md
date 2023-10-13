@@ -21,7 +21,7 @@ part of the stack when running with the Linux profile: run `docker compose up --
 Make sure to set the `OLLAMA_BASE_URL=http://llm:11434` in the `.env` file when using Ollama docker container.
 
 **Windows**
-Not supported by Ollama, so Windows users need to generate a OpenAI API key and configure the stack to use `GPT-3.5` or `GPT-4` in the `.env` file.
+Not supported by Ollama, so Windows users need to generate a OpenAI API key and configure the stack to use `gpt-3.5` or `gpt-4` in the `.env` file.
 # Develop
 
 > [!WARNING]
