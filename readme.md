@@ -8,6 +8,21 @@ Learn more about the details in the [technical blog post](https://neo4j.com/deve
 
 Create a `.env` file from the environment template file `env.example`
 
+Available variables:
+| Variable Name          | Default value                      | Description                                                 |
+|------------------------|------------------------------------|-------------------------------------------------------------|
+| OLLAMA_BASE_URL        | http://host.docker.internal:11434  | REQUIRED - URL to Ollama LLM API                            |   
+| NEO4J_URI              | neo4j://database:7687              | REQUIRED - URL to Neo4j database                            |
+| NEO4J_USERNAME         | neo4j                              | REQUIRED - Username for Neo4j database                      |
+| NEO4J_PASSWORD         | password                           | REQUIRED - Password for Neo4j database                      |
+| LLM                    | llama2                             | REQUIRED - Can be any Ollama model tag, or gpt-4 or gpt-3.5 | 
+| OPENAI_API_KEY         |                                    | REQUIRED - Only if LLM=gpt-4 or LLM=gpt-3.5                 |
+| EMBEDDING_MODEL        | sentence_transformer               | REQUIRED - Can be sentence_transformer, openai or ollama    |
+| LANGCHAIN_ENDPOINT     | "https://api.smith.langchain.com"  | OPTIONAL - URL to Langchain Smith API                       |
+| LANGCHAIN_TRACING_V2   | false                              | OPTIONAL - Enable Langchain tracing v2                      |
+| LANGCHAIN_PROJECT      |                                    | OPTIONAL - Langchain project name                           |
+| LANGCHAIN_API_KEY      |                                    | OPTIONAL - Langchain API key                                |
+
 ## LLM Configuration
 MacOS and Linux users can use any LLM that's available via Ollama. Check the "tags" section under the model page you want to use on https://ollama.ai/library and write the tag for the value of the environment variable `LLM=` in th e`.env` file.
 All platforms can use GPT-3.5-turbo and GPT-4 (bring your own API keys for OpenAIs models).
@@ -17,7 +32,7 @@ Install [Ollama](https://ollama.ai) in MacOS and start it before running `docker
 
 **Linux**
 No need to install Ollama manually, it will run in a container as
-part of the stack when running with the Linux profile: run `docker compose up --profile linux`.
+part of the stack when running with the Linux profile: run `docker compose --profile linux up`.
 Make sure to set the `OLLAMA_BASE_URL=http://llm:11434` in the `.env` file when using Ollama docker container.
 
 **Windows**

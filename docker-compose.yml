@@ -3,8 +3,6 @@ services:
   llm:
     image: ollama/ollama:latest
     profiles: ["linux"]
-    ports:
-      - 11434:11434
     networks:
       - net
 
@@ -60,10 +58,6 @@ services:
         condition: service_healthy
       pull-model:
         condition: service_completed_successfully
-
-    ports:
-      - 8081:8080
-      - 8502:8502
     x-develop:
       watch:
         - action: rebuild
@@ -73,6 +67,9 @@ services:
             - pdf_bot.py
             - api.py
             - front-end/
+    ports:
+      - 8081:8080
+      - 8502:8502
 
 
   bot:
@@ -108,10 +105,8 @@ services:
             - pdf_bot.py
             - api.py
             - front-end/
-
     ports:
       - 8501:8501
-
 
   pdf_bot:
     build:
