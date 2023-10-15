@@ -1,3 +1,8 @@
+[![GitHub license](https://badgen.net/github/license/docker/genai-stack)](https://github.com/docker/genai-stack/blob/master/LICENSE)
+[![GitHub forks](https://badgen.net/github/forks/docker/genai-stack/)](https://GitHub.com/docker/genai-stack/)
+[![GitHub stars](https://badgen.net/github/stars/docker/genai-stack)](https://GitHub.com/docker/genai-stack/)
+[![GitHub issues](https://badgen.net/github/issues/docker/genai-stack/)](https://GitHub.com/docker/genai-stack/issues/)
+
 # GenAI Stack
 This GenAI application stack will get you started building your
 own GenAI application in no time.
