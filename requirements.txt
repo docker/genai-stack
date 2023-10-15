@@ -12,3 +12,4 @@ torch==2.0.1
 pydantic
 uvicorn
 sse-starlette
+boto3
