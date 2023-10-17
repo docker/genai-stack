@@ -15,6 +15,7 @@ services:
       - LLM=${LLM-llama2}
     networks:
       - net
+    tty: true
 
   database:
     image: neo4j:5.11
