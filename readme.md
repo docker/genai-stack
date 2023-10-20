@@ -143,7 +143,7 @@ curl http://localhost:8504/query-stream\?text\=minimal%20hello%20world%20in%20py
 
 Exposes the functionality to answer questions in the same way as App 1 above. Uses
 same code and prompts.
-
+#run
 ## App 5 Static front-end
 UI: http://localhost:8505
 
