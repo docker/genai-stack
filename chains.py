@@ -28,7 +28,7 @@ def load_embedding_model(embedding_model_name: str, logger=BaseLogger(), config=
         embeddings = OpenAIEmbeddings()
         dimension = 1536
         logger.info("Embedding: Using OpenAI")
-    if embedding_model_name == "aws":
+    elif embedding_model_name == "aws":
         embeddings = BedrockEmbeddings()
         dimension = 1536
         logger.info("Embedding: Using AWS")
