@@ -17,7 +17,9 @@ from typing import List, Any
 from utils import BaseLogger
 
 
-def load_embedding_model(embedding_model_name: str, logger=BaseLogger(), config={}):
+def load_embedding_model(embedding_model_name: str, logger=BaseLogger(), config=None):
+    if config is None:
+        config = {}
     if embedding_model_name == "ollama":
         embeddings = OllamaEmbeddings(
             base_url=config["ollama_base_url"], model="llama2"
@@ -41,7 +43,9 @@ def load_embedding_model(embedding_model_name: str, logger=BaseLogger(), config=
     return embeddings, dimension
 
 
-def load_llm(llm_name: str, logger=BaseLogger(), config={}):
+def load_llm(llm_name: str, logger=BaseLogger(), config=None):
+    if config is None:
+        config = {}
     if llm_name == "gpt-4":
         logger.info("LLM: Using GPT-4")
         return ChatOpenAI(temperature=0, model_name="gpt-4", streaming=True)
@@ -153,10 +157,9 @@ def configure_qa_rag_chain(llm, embeddings, embeddings_store_url, username, pass
     """,
     )
 
-    kg_qa = RetrievalQAWithSourcesChain(
+    return RetrievalQAWithSourcesChain(
         combine_documents_chain=qa_chain,
         retriever=kg.as_retriever(search_kwargs={"k": 2}),
         reduce_k_below_max_tokens=False,
         max_tokens_limit=3375,
     )
-    return kg_qa

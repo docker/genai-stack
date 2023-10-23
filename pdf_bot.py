@@ -57,10 +57,7 @@ def main():
     if pdf is not None:
         pdf_reader = PdfReader(pdf)
 
-        text = ""
-        for page in pdf_reader.pages:
-            text += page.extract_text()
-
+        text = "".join(page.extract_text() for page in pdf_reader.pages)
         # langchain_textspliter
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=1000, chunk_overlap=200, length_function=len
@@ -83,10 +80,9 @@ def main():
             llm=llm, chain_type="stuff", retriever=vectorstore.as_retriever()
         )
 
-        # Accept user questions/query
-        query = st.text_input("Ask questions about related your upload pdf file")
-
-        if query:
+        if query := st.text_input(
+            "Ask questions about related your upload pdf file"
+        ):
             stream_handler = StreamHandler(st.empty())
             qa.run(query, callbacks=[stream_handler])
 

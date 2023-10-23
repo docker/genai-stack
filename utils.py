@@ -1,3 +1,4 @@
+import contextlib
 class BaseLogger:
     def __init__(self) -> None:
         self.info = print
@@ -28,15 +29,11 @@ def extract_title_and_question(input_string):
 
 def create_vector_index(driver, dimension: int) -> None:
     index_query = "CALL db.index.vector.createNodeIndex('stackoverflow', 'Question', 'embedding', $dimension, 'cosine')"
-    try:
+    with contextlib.suppress(Exception):
         driver.query(index_query, {"dimension": dimension})
-    except:  # Already exists
-        pass
     index_query = "CALL db.index.vector.createNodeIndex('top_answers', 'Answer', 'embedding', $dimension, 'cosine')"
-    try:
+    with contextlib.suppress(Exception):
         driver.query(index_query, {"dimension": dimension})
-    except:  # Already exists
-        pass
 
 
 def create_constraints(driver):

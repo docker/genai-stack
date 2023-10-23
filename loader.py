@@ -97,10 +97,9 @@ def insert_so_data(data: dict) -> None:
 
 # Streamlit
 def get_tag() -> str:
-    input_text = st.text_input(
+    return st.text_input(
         "Which tag questions do you want to import?", value="neo4j"
     )
-    return input_text
 
 
 def get_pages():
