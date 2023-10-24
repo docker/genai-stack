@@ -11,6 +11,7 @@ from chains import (
     load_llm,
     configure_llm_only_chain,
     configure_qa_rag_chain,
+    generate_ticket,
 )
 from fastapi import FastAPI, Depends
 from pydantic import BaseModel
@@ -112,6 +113,10 @@ class Question(BaseModel):
     rag: bool = False
 
 
+class BaseTicket(BaseModel):
+    text: str
+
+
 @app.get("/query-stream")
 def qstream(question: Question = Depends()):
     output_function = llm_chain
@@ -143,4 +148,14 @@ async def ask(question: Question = Depends()):
         {"question": question.text, "chat_history": []}, callbacks=[]
     )
 
-    return json.dumps({"result": result["answer"], "model": llm_name})
+    return {"result": result["answer"], "model": llm_name}
+
+
+@app.get("/generate-ticket")
+async def generate_ticket_api(question: BaseTicket = Depends()):
+    new_title, new_question = generate_ticket(
+        neo4j_graph=neo4j_graph,
+        llm_chain=llm_chain,
+        input_question=question.text,
+    )
+    return {"result": {"title": new_title, "text": new_question}, "model": llm_name}
