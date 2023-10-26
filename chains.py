@@ -175,23 +175,23 @@ def generate_ticket(neo4j_graph, llm_chain, input_question):
     # Ask LLM to generate new question in the same style
     questions_prompt = ""
     for i, question in enumerate(questions, start=1):
-        questions_prompt += f"{i}. {question[0]}\n"
-        questions_prompt += f"{question[1]}\n\n"
+        questions_prompt += f"{i}. \n{question[0]}\n----\n\n"
+        questions_prompt += f"{question[1][:150]}\n\n"
         questions_prompt += "----\n\n"
 
     gen_system_template = f"""
     You're an expert in formulating high quality questions. 
-    Can you formulate a question in the same style, detail and tone as the following example questions?
+    Formulate a question in the same style and tone as the following example questions.
     {questions_prompt}
     ---
 
     Don't make anything up, only use information in the following question.
     Return a title for the question, and the question post itself.
 
-    Return example:
+    Return format template:
     ---
-    Title: How do I use the Neo4j Python driver?
-    Question: I'm trying to connect to Neo4j using the Python driver, but I'm getting an error.
+    Title: This is a new title
+    Question: This is a new question
     ---
     """
     # we need jinja2 since the questions themselves contain curly braces
@@ -203,7 +203,7 @@ def generate_ticket(neo4j_graph, llm_chain, input_question):
             system_prompt,
             SystemMessagePromptTemplate.from_template(
                 """
-                Respond in the following format or you will be unplugged.
+                Respond in the following template format or you will be unplugged.
                 ---
                 Title: New title
                 Question: New question

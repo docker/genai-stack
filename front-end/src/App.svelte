@@ -10,7 +10,7 @@
     import { generationStore } from "./lib/generation.store";
 
     let ragMode = false;
-    let question = "How summarize PDFs using langchain?";
+    let question = "How can I calculate age from date of birth in Cypher?";
     let shouldAutoScroll = true;
     let input;
     let senderImages = { bot: botImage, me: meImage };
