@@ -10,7 +10,7 @@
     import { generationStore } from "./lib/generation.store";
 
     let ragMode = false;
-    let question = "How can I create a chatbot on top of my local PDF files using langchain?";
+    let question = "How summarize PDFs using langchain?";
     let shouldAutoScroll = true;
     let input;
     let senderImages = { bot: botImage, me: meImage };
@@ -95,6 +95,7 @@
                 </div>
                 <form class="rounded-md w-full bg-white p-2 m-0" on:submit|preventDefault={send}>
                     <input
+                        placeholder="What coding related question can I help you with?"
                         disabled={$chatStore.state === chatStates.RECEIVING}
                         class="text-lg w-full bg-white focus:outline-none px-4"
                         bind:value={question}
