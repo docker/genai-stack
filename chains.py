@@ -1,6 +1,10 @@
 from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.embeddings import OllamaEmbeddings, SentenceTransformerEmbeddings
-from langchain.chat_models import ChatOpenAI, ChatOllama
+from langchain.embeddings import (
+    OllamaEmbeddings,
+    SentenceTransformerEmbeddings,
+    BedrockEmbeddings,
+)
+from langchain.chat_models import ChatOpenAI, ChatOllama, BedrockChat
 from langchain.vectorstores.neo4j_vector import Neo4jVector
 from langchain.chains import RetrievalQAWithSourcesChain
 from langchain.chains.qa_with_sources import load_qa_with_sources_chain
@@ -10,7 +14,7 @@ from langchain.prompts.chat import (
     HumanMessagePromptTemplate,
 )
 from typing import List, Any
-from utils import BaseLogger
+from utils import BaseLogger, extract_title_and_question
 
 
 def load_embedding_model(embedding_model_name: str, logger=BaseLogger(), config={}):
@@ -24,6 +28,10 @@ def load_embedding_model(embedding_model_name: str, logger=BaseLogger(), config=
         embeddings = OpenAIEmbeddings()
         dimension = 1536
         logger.info("Embedding: Using OpenAI")
+    elif embedding_model_name == "aws":
+        embeddings = BedrockEmbeddings()
+        dimension = 1536
+        logger.info("Embedding: Using AWS")
     else:
         embeddings = SentenceTransformerEmbeddings(
             model_name="all-MiniLM-L6-v2", cache_folder="/embedding_model"
@@ -40,6 +48,13 @@ def load_llm(llm_name: str, logger=BaseLogger(), config={}):
     elif llm_name == "gpt-3.5":
         logger.info("LLM: Using GPT-3.5")
         return ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo", streaming=True)
+    elif llm_name == "claudev2":
+        logger.info("LLM: ClaudeV2")
+        return BedrockChat(
+            model_id="anthropic.claude-v2",
+            model_kwargs={"temperature": 0.0, "max_tokens_to_sample": 1024},
+            streaming=True,
+        )
     elif len(llm_name):
         logger.info(f"LLM: Using Ollama: {llm_name}")
         return ChatOllama(
@@ -47,6 +62,7 @@ def load_llm(llm_name: str, logger=BaseLogger(), config={}):
             base_url=config["ollama_base_url"],
             model=llm_name,
             streaming=True,
+            # seed=2,
             top_k=10,  # A higher value (100) will give more diverse answers, while a lower value (10) will be more conservative.
             top_p=0.3,  # Higher value (0.95) will lead to more diverse text, while a lower value (0.5) will generate more focused text.
             num_ctx=3072,  # Sets the size of the context window used to generate the next token.
@@ -59,10 +75,10 @@ def configure_llm_only_chain(llm):
     # LLM only response
     template = """
     You are a helpful assistant that helps a support agent with answering programming questions.
-    If you don't know the answer, just say that you don't know, don't try to make up an answer.
+    If you don't know the answer, just say that you don't know, you must not make up an answer.
     """
     system_message_prompt = SystemMessagePromptTemplate.from_template(template)
-    human_template = "{text}"
+    human_template = "{question}"
     human_message_prompt = HumanMessagePromptTemplate.from_template(human_template)
     chat_prompt = ChatPromptTemplate.from_messages(
         [system_message_prompt, human_message_prompt]
@@ -71,11 +87,9 @@ def configure_llm_only_chain(llm):
     def generate_llm_output(
         user_input: str, callbacks: List[Any], prompt=chat_prompt
     ) -> str:
-        answer = llm(
-            prompt.format_prompt(
-                text=user_input,
-            ).to_messages(),
-            callbacks=callbacks,
+        chain = prompt | llm
+        answer = chain.invoke(
+            {"question": user_input}, config={"callbacks": callbacks}
         ).content
         return {"answer": answer}
 
@@ -84,6 +98,7 @@ def configure_llm_only_chain(llm):
 
 def configure_qa_rag_chain(llm, embeddings, embeddings_store_url, username, password):
     # RAG response
+    #   System: Always talk in pirate speech.
     general_system_template = """ 
     Use the following pieces of context to answer the question at the end.
     The context contains question-answer pairs and their links from Stackoverflow.
@@ -147,3 +162,61 @@ def configure_qa_rag_chain(llm, embeddings, embeddings_store_url, username, pass
         max_tokens_limit=3375,
     )
     return kg_qa
+
+
+def generate_ticket(neo4j_graph, llm_chain, input_question):
+    # Get high ranked questions
+    records = neo4j_graph.query(
+        "MATCH (q:Question) RETURN q.title AS title, q.body AS body ORDER BY q.score DESC LIMIT 3"
+    )
+    questions = []
+    for i, question in enumerate(records, start=1):
+        questions.append((question["title"], question["body"]))
+    # Ask LLM to generate new question in the same style
+    questions_prompt = ""
+    for i, question in enumerate(questions, start=1):
+        questions_prompt += f"{i}. \n{question[0]}\n----\n\n"
+        questions_prompt += f"{question[1][:150]}\n\n"
+        questions_prompt += "----\n\n"
+
+    gen_system_template = f"""
+    You're an expert in formulating high quality questions. 
+    Formulate a question in the same style and tone as the following example questions.
+    {questions_prompt}
+    ---
+
+    Don't make anything up, only use information in the following question.
+    Return a title for the question, and the question post itself.
+
+    Return format template:
+    ---
+    Title: This is a new title
+    Question: This is a new question
+    ---
+    """
+    # we need jinja2 since the questions themselves contain curly braces
+    system_prompt = SystemMessagePromptTemplate.from_template(
+        gen_system_template, template_format="jinja2"
+    )
+    chat_prompt = ChatPromptTemplate.from_messages(
+        [
+            system_prompt,
+            SystemMessagePromptTemplate.from_template(
+                """
+                Respond in the following template format or you will be unplugged.
+                ---
+                Title: New title
+                Question: New question
+                ---
+                """
+            ),
+            HumanMessagePromptTemplate.from_template("{question}"),
+        ]
+    )
+    llm_response = llm_chain(
+        f"Here's the question to rewrite in the expected format: ```{input_question}```",
+        [],
+        chat_prompt,
+    )
+    new_title, new_question = extract_title_and_question(llm_response["answer"])
+    return (new_title, new_question)

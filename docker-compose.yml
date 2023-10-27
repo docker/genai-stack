@@ -3,8 +3,6 @@ services:
   llm:
     image: ollama/ollama:latest
     profiles: ["linux"]
-    ports:
-      - 11434:11434
     networks:
       - net
 
@@ -14,7 +12,7 @@ services:
       dockerfile: pull_model.Dockerfile
     environment:
       - OLLAMA_BASE_URL=${OLLAMA_BASE_URL-http://host.docker.internal:11434}
-      - LLM
+      - LLM=${LLM-llama2}
     networks:
       - net
 
@@ -46,13 +44,16 @@ services:
       - NEO4J_URI=${NEO4J_URI-neo4j://database:7687}
       - NEO4J_PASSWORD=${NEO4J_PASSWORD-password}
       - NEO4J_USERNAME=${NEO4J_USERNAME-neo4j}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY-}
       - OLLAMA_BASE_URL=${OLLAMA_BASE_URL-http://host.docker.internal:11434}
       - EMBEDDING_MODEL=${EMBEDDING_MODEL-sentence_transformer}
       - LANGCHAIN_ENDPOINT=${LANGCHAIN_ENDPOINT-"https://api.smith.langchain.com"}
       - LANGCHAIN_TRACING_V2=${LANGCHAIN_TRACING_V2-false}
       - LANGCHAIN_PROJECT=${LANGCHAIN_PROJECT}
       - LANGCHAIN_API_KEY=${LANGCHAIN_API_KEY}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
     networks:
       - net
     depends_on:
@@ -60,10 +61,6 @@ services:
         condition: service_healthy
       pull-model:
         condition: service_completed_successfully
-
-    ports:
-      - 8081:8080
-      - 8502:8502
     x-develop:
       watch:
         - action: rebuild
@@ -71,11 +68,92 @@ services:
           ignore:
             - bot.py
             - pdf_bot.py
+            - api.py
+            - front-end/
+    ports:
+      - 8081:8080
+      - 8502:8502
 
 
   bot:
     build:
       dockerfile: bot.Dockerfile
+    volumes:
+      - $PWD/embedding_model:/embedding_model
+    environment:
+      - NEO4J_URI=${NEO4J_URI-neo4j://database:7687}
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD-password}
+      - NEO4J_USERNAME=${NEO4J_USERNAME-neo4j}
+      - OPENAI_API_KEY=${OPENAI_API_KEY-}
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL-http://host.docker.internal:11434}
+      - LLM=${LLM-llama2}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL-sentence_transformer}
+      - LANGCHAIN_ENDPOINT=${LANGCHAIN_ENDPOINT-"https://api.smith.langchain.com"}
+      - LANGCHAIN_TRACING_V2=${LANGCHAIN_TRACING_V2-false}
+      - LANGCHAIN_PROJECT=${LANGCHAIN_PROJECT}
+      - LANGCHAIN_API_KEY=${LANGCHAIN_API_KEY}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+    networks:
+      - net
+    depends_on:
+      database:
+        condition: service_healthy
+      pull-model:
+        condition: service_completed_successfully
+    x-develop:
+      watch:
+        - action: rebuild
+          path: .
+          ignore:
+            - loader.py
+            - pdf_bot.py
+            - api.py
+            - front-end/
+    ports:
+      - 8501:8501
+
+  pdf_bot:
+    build:
+      dockerfile: pdf_bot.Dockerfile
+    environment:
+      - NEO4J_URI=${NEO4J_URI-neo4j://database:7687}
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD-password}
+      - NEO4J_USERNAME=${NEO4J_USERNAME-neo4j}
+      - OPENAI_API_KEY=${OPENAI_API_KEY-}
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL-http://host.docker.internal:11434}
+      - LLM=${LLM-llama2}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL-sentence_transformer}
+      - LANGCHAIN_ENDPOINT=${LANGCHAIN_ENDPOINT-"https://api.smith.langchain.com"}
+      - LANGCHAIN_TRACING_V2=${LANGCHAIN_TRACING_V2-false}
+      - LANGCHAIN_PROJECT=${LANGCHAIN_PROJECT}
+      - LANGCHAIN_API_KEY=${LANGCHAIN_API_KEY}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+    networks:
+      - net
+    depends_on:
+      database:
+        condition: service_healthy
+      pull-model:
+        condition: service_completed_successfully
+    x-develop:
+      watch:
+        - action: rebuild
+          path: .
+          ignore:
+            - loader.py
+            - bot.py
+            - api.py
+            - front-end/
+    ports:
+      - 8503:8503
+
+  api:
+    build:
+      dockerfile: api.Dockerfile
     volumes:
       - $PWD/embedding_model:/embedding_model
     environment:
@@ -90,40 +168,9 @@ services:
       - LANGCHAIN_TRACING_V2=${LANGCHAIN_TRACING_V2-false}
       - LANGCHAIN_PROJECT=${LANGCHAIN_PROJECT}
       - LANGCHAIN_API_KEY=${LANGCHAIN_API_KEY}
-    networks:
-      - net
-    depends_on:
-      database:
-        condition: service_healthy
-      pull-model:
-        condition: service_completed_successfully
-    x-develop:
-      watch:
-        - action: rebuild
-          path: .
-          ignore:
-            - loader.py
-            - pdf_bot.py
-
-    ports:
-      - 8501:8501
-
-
-  pdf_bot:
-    build:
-      dockerfile: pdf_bot.Dockerfile
-    environment:
-      - NEO4J_URI=${NEO4J_URI-neo4j://database:7687}
-      - NEO4J_PASSWORD=${NEO4J_PASSWORD-password}
-      - NEO4J_USERNAME=${NEO4J_USERNAME-neo4j}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL-http://host.docker.internal:11434}
-      - LLM=${LLM-llama2}
-      - EMBEDDING_MODEL=${EMBEDDING_MODEL-sentence_transformer}
-      - LANGCHAIN_ENDPOINT=${LANGCHAIN_ENDPOINT-"https://api.smith.langchain.com"}
-      - LANGCHAIN_TRACING_V2=${LANGCHAIN_TRACING_V2-false}
-      - LANGCHAIN_PROJECT=${LANGCHAIN_PROJECT}
-      - LANGCHAIN_API_KEY=${LANGCHAIN_API_KEY}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
     networks:
       - net
     depends_on:
@@ -138,9 +185,30 @@ services:
           ignore:
             - loader.py
             - bot.py
-
+            - pdf_bot.py
+            - front-end/
     ports:
-      - 8503:8503
+      - 8504:8504
+
+  front-end:
+    build:
+      dockerfile: front-end.Dockerfile
+    x-develop:
+      watch:
+        - action: sync
+          path: ./front-end
+          target: /app
+          ignore:
+            - ./front-end/node_modules/
+        - action: rebuild
+          path: ./front-end/package.json
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - net
+    ports:
+      - 8505:8505
 
 networks:
   net:
