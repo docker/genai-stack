@@ -14,7 +14,7 @@ from langchain.prompts.chat import (
     HumanMessagePromptTemplate,
 )
 from typing import List, Any
-from utils import BaseLogger
+from utils import BaseLogger, extract_title_and_question
 
 
 def load_embedding_model(embedding_model_name: str, logger=BaseLogger(), config={}):
@@ -28,7 +28,7 @@ def load_embedding_model(embedding_model_name: str, logger=BaseLogger(), config=
         embeddings = OpenAIEmbeddings()
         dimension = 1536
         logger.info("Embedding: Using OpenAI")
-    if embedding_model_name == "aws":
+    elif embedding_model_name == "aws":
         embeddings = BedrockEmbeddings()
         dimension = 1536
         logger.info("Embedding: Using AWS")
@@ -88,7 +88,9 @@ def configure_llm_only_chain(llm):
         user_input: str, callbacks: List[Any], prompt=chat_prompt
     ) -> str:
         chain = prompt | llm
-        answer = chain.invoke(user_input, config={"callbacks": callbacks}).content
+        answer = chain.invoke(
+            {"question": user_input}, config={"callbacks": callbacks}
+        ).content
         return {"answer": answer}
 
     return generate_llm_output
@@ -160,3 +162,61 @@ def configure_qa_rag_chain(llm, embeddings, embeddings_store_url, username, pass
         max_tokens_limit=3375,
     )
     return kg_qa
+
+
+def generate_ticket(neo4j_graph, llm_chain, input_question):
+    # Get high ranked questions
+    records = neo4j_graph.query(
+        "MATCH (q:Question) RETURN q.title AS title, q.body AS body ORDER BY q.score DESC LIMIT 3"
+    )
+    questions = []
+    for i, question in enumerate(records, start=1):
+        questions.append((question["title"], question["body"]))
+    # Ask LLM to generate new question in the same style
+    questions_prompt = ""
+    for i, question in enumerate(questions, start=1):
+        questions_prompt += f"{i}. \n{question[0]}\n----\n\n"
+        questions_prompt += f"{question[1][:150]}\n\n"
+        questions_prompt += "----\n\n"
+
+    gen_system_template = f"""
+    You're an expert in formulating high quality questions. 
+    Formulate a question in the same style and tone as the following example questions.
+    {questions_prompt}
+    ---
+
+    Don't make anything up, only use information in the following question.
+    Return a title for the question, and the question post itself.
+
+    Return format template:
+    ---
+    Title: This is a new title
+    Question: This is a new question
+    ---
+    """
+    # we need jinja2 since the questions themselves contain curly braces
+    system_prompt = SystemMessagePromptTemplate.from_template(
+        gen_system_template, template_format="jinja2"
+    )
+    chat_prompt = ChatPromptTemplate.from_messages(
+        [
+            system_prompt,
+            SystemMessagePromptTemplate.from_template(
+                """
+                Respond in the following template format or you will be unplugged.
+                ---
+                Title: New title
+                Question: New question
+                ---
+                """
+            ),
+            HumanMessagePromptTemplate.from_template("{question}"),
+        ]
+    )
+    llm_response = llm_chain(
+        f"Here's the question to rewrite in the expected format: ```{input_question}```",
+        [],
+        chat_prompt,
+    )
+    new_title, new_question = extract_title_and_question(llm_response["answer"])
+    return (new_title, new_question)

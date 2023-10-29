@@ -3,15 +3,9 @@ import os
 import streamlit as st
 from streamlit.logger import get_logger
 from langchain.callbacks.base import BaseCallbackHandler
-from langchain.prompts.chat import (
-    ChatPromptTemplate,
-    SystemMessagePromptTemplate,
-    HumanMessagePromptTemplate,
-)
 from langchain.graphs import Neo4jGraph
 from dotenv import load_dotenv
 from utils import (
-    extract_title_and_question,
     create_vector_index,
 )
 from chains import (
@@ -19,6 +13,7 @@ from chains import (
     load_llm,
     configure_llm_only_chain,
     configure_qa_rag_chain,
+    generate_ticket,
 )
 
 load_dotenv(".env")
@@ -148,65 +143,6 @@ elif name == "Vector + Graph" or name == "Enabled":
     output_function = rag_chain
 
 
-def generate_ticket():
-    # Get high ranked questions
-    records = neo4j_graph.query(
-        "MATCH (q:Question) RETURN q.title AS title, q.body AS body ORDER BY q.score DESC LIMIT 3"
-    )
-    questions = []
-    for i, question in enumerate(records, start=1):
-        questions.append((question["title"], question["body"]))
-    # Ask LLM to generate new question in the same style
-    questions_prompt = ""
-    for i, question in enumerate(questions, start=1):
-        questions_prompt += f"{i}. {question[0]}\n"
-        questions_prompt += f"{question[1]}\n\n"
-        questions_prompt += "----\n\n"
-
-    gen_system_template = f"""
-    You're an expert in formulating high quality questions. 
-    Can you formulate a question in the same style, detail and tone as the following example questions?
-    {questions_prompt}
-    ---
-
-    Don't make anything up, only use information in the following question.
-    Return a title for the question, and the question post itself.
-
-    Return example:
-    ---
-    Title: How do I use the Neo4j Python driver?
-    Question: I'm trying to connect to Neo4j using the Python driver, but I'm getting an error.
-    ---
-    """
-    # we need jinja2 since the questions themselves contain curly braces
-    system_prompt = SystemMessagePromptTemplate.from_template(
-        gen_system_template, template_format="jinja2"
-    )
-    q_prompt = st.session_state[f"user_input"][-1]
-    chat_prompt = ChatPromptTemplate.from_messages(
-        [
-            system_prompt,
-            SystemMessagePromptTemplate.from_template(
-                """
-                Respond in the following format or you will be unplugged.
-                ---
-                Title: New title
-                Question: New question
-                ---
-                """
-            ),
-            HumanMessagePromptTemplate.from_template("{text}"),
-        ]
-    )
-    llm_response = llm_chain(
-        f"Here's the question to rewrite in the expected format: ```{q_prompt}```",
-        [],
-        chat_prompt,
-    )
-    new_title, new_question = extract_title_and_question(llm_response["answer"])
-    return (new_title, new_question)
-
-
 def open_sidebar():
     st.session_state.open_sidebar = True
 
@@ -218,7 +154,11 @@ def close_sidebar():
 if not "open_sidebar" in st.session_state:
     st.session_state.open_sidebar = False
 if st.session_state.open_sidebar:
-    new_title, new_question = generate_ticket()
+    new_title, new_question = generate_ticket(
+        neo4j_graph=neo4j_graph,
+        llm_chain=llm_chain,
+        input_question=st.session_state[f"user_input"][-1],
+    )
     with st.sidebar:
         st.title("Ticket draft")
         st.write("Auto generated draft ticket")
