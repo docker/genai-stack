@@ -61,7 +61,7 @@ services:
         condition: service_healthy
       pull-model:
         condition: service_completed_successfully
-    x-develop:
+    develop:
       watch:
         - action: rebuild
           path: .
@@ -102,7 +102,7 @@ services:
         condition: service_healthy
       pull-model:
         condition: service_completed_successfully
-    x-develop:
+    develop:
       watch:
         - action: rebuild
           path: .
@@ -139,7 +139,7 @@ services:
         condition: service_healthy
       pull-model:
         condition: service_completed_successfully
-    x-develop:
+    develop:
       watch:
         - action: rebuild
           path: .
@@ -178,7 +178,7 @@ services:
         condition: service_healthy
       pull-model:
         condition: service_completed_successfully
-    x-develop:
+    develop:
       watch:
         - action: rebuild
           path: .
@@ -193,7 +193,7 @@ services:
   front-end:
     build:
       dockerfile: front-end.Dockerfile
-    x-develop:
+    develop:
       watch:
         - action: sync
           path: ./front-end
