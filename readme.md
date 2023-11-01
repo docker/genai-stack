@@ -43,7 +43,7 @@ Not supported by Ollama, so Windows users need to generate a OpenAI API key and 
 # Develop
 
 > [!WARNING]
-> There is a performance issue that impacts python applications in the latest release of Docker Desktop. Until a fix is available, please use [version `4.23.0`](https://docs.docker.com/desktop/release-notes/#4230) or earlier.
+> There is a performance issue that impacts python applications in the `4.24.x` releases of Docker Desktop. Please upgrade to the latest release before using this stack.
 
 **To start everything**
 ```
@@ -57,7 +57,7 @@ docker compose up --build
 To enter **watch mode** (auto rebuild on file changes).
 First start everything, then in new terminal:
 ```
-docker compose alpha watch
+docker compose watch
 ```
 
 **Shutdown**
