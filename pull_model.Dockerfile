@@ -1,4 +1,4 @@
-#syntax = docker/dockerfile:1.4
+# syntax=docker/dockerfile:1.4
 
 FROM ollama/ollama:latest AS ollama
 FROM babashka/babashka:latest
@@ -16,11 +16,6 @@ COPY <<EOF pull_model.clj
         url (get (System/getenv) "OLLAMA_BASE_URL")]
     (println (format "pulling ollama model %s using %s" llm url))
     (if (and llm url (not (#{"gpt-4" "gpt-3.5" "claudev2"} llm)))
-
-      ;; ----------------------------------------------------------------------
-      ;; just call `ollama pull` here - create OLLAMA_HOST from OLLAMA_BASE_URL
-      ;; ----------------------------------------------------------------------
-      ;; TODO - this still doesn't show progress properly when run from docker compose
 
       (let [done (async/chan)]
         (async/go-loop [n 0]
