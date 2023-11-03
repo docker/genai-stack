@@ -1,10 +1,21 @@
 services:
 
-  llm:
+  llm: &llm
     image: ollama/ollama:latest
     profiles: ["linux"]
     networks:
       - net
+
+  llm-gpu:
+    <<: *llm
+    profiles: ["linux-gpu"]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
 
   pull-model:
     image: genai-stack/pull-model:latest
