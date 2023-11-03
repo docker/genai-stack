@@ -38,6 +38,19 @@ No need to install Ollama manually, it will run in a container as
 part of the stack when running with the Linux profile: run `docker compose --profile linux up`.
 Make sure to set the `OLLAMA_BASE_URL=http://llm:11434` in the `.env` file when using Ollama docker container.
 
+If run into issues that your Nvidia GPU is not used under Linux (despite using the profile), ensure that you have `nvidia-container-toolkit` installed.
+And add this to the `llm` service. 
+
+```yaml
+deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+```
+
 **Windows**
 Not supported by Ollama, so Windows users need to generate a OpenAI API key and configure the stack to use `gpt-3.5` or `gpt-4` in the `.env` file.
 # Develop
