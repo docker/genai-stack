@@ -46,6 +46,13 @@ Not supported by Ollama, so Windows users need to generate a OpenAI API key and 
 > There is a performance issue that impacts python applications in the latest release of Docker Desktop. Until a fix is available, please use [version `4.23.0`](https://docs.docker.com/desktop/release-notes/#4230) or earlier.
 
 **To start everything**
+
+In fs.py file change directory path to your preferred ts/js local repo (This project was built with taking Rocket.Chat repo locally). This will generate a all_code_blocks.json file whose content which you have to then paste in loader.py replacing in code variable. In env also use LLM=codellam and EMBEDDING_MODEL=sentence_transformer.
+
+```
+python3 fs.py
+```
+
 ```
 docker compose up
 ```
