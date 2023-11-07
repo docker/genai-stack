@@ -3,3 +3,4 @@ data/
 embedding_model/*
 !embedding_model/.ignore
 .DS_Store
+all_code_blocks.json

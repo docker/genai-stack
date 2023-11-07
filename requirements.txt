@@ -13,3 +13,4 @@ pydantic
 uvicorn
 sse-starlette
 boto3
+chardet
