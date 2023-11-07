@@ -21249,13 +21249,4 @@ def render_page():
             except Exception as e:
                 st.error(f"Error: {e}", icon="🚨")
 
-    with st.expander("Highly ranked questions rather than tags?"):
-        if st.button("Import highly ranked questions"):
-            with st.spinner("Loading... This might take a minute or two."):
-                try:
-                    # Your logic for importing highly ranked questions here
-                    st.success("Import successful", icon="✅")
-                except Exception as e:
-                    st.error(f"Error: {e}", icon="🚨")
-
 render_page()
