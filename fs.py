@@ -35,7 +35,7 @@ ignore = [
     ".env*.local",
     ".vercel",
     "*.tsbuildinfo",
-    ".env"
+    ".env",
     "next-env.d.ts",
     "/.git",
     "/.husky",
@@ -82,6 +82,10 @@ def should_ignore_directory(dir_path):
 # List of keywords to ignore
 ignored_keywords = ["require", "strict", "import", "export"]
 
+# Add characters or patterns to ignore
+characters_to_ignore = ["#", "*", "!", "$", "+", "-"]
+
+# Function to extract code from content while ignoring specific characters or patterns
 def extract_code_from_content(content):
     code_blocks = {}
     is_inside_code_block = False
@@ -89,8 +93,8 @@ def extract_code_from_content(content):
     current_key = None
 
     for line in content.split('\n'):
-        # Check if the line contains any of the ignored keywords
-        if any(keyword in line for keyword in ignored_keywords):
+        # Check if the line contains any of the ignored keywords or characters
+        if any(keyword in line for keyword in ignored_keywords) or any(char in line for char in characters_to_ignore):
             is_inside_code_block = False
             current_code_block = []
             current_key = None
@@ -172,10 +176,14 @@ output_json_path = "all_code_blocks.json"
 
 # Process file contents
 all_code_blocks = []
+total_keys = 0
 
 for file_path, content in file_contents.items():
     code_blocks = extract_code_from_content(content)
 
+    # Ignore code blocks with keys that contain specific characters
+    code_blocks = {key: value for key, value in code_blocks.items() if all(char not in key for char in characters_to_ignore)}
+    
     # Remove empty keys (code blocks with empty values) and keys with brackets
     code_blocks = {key: value for key, value in code_blocks.items() if value.strip() and "[" not in key and "]" not in key}
 
@@ -190,8 +198,12 @@ for file_path, content in file_contents.items():
             "depth_rank": depth_info_for_file["rank"]
         })
 
+        # Update the total keys
+        total_keys += len(code_blocks)
+
 # Write the collected code blocks to the output JSON file
 with open(output_json_path, 'w', encoding='utf-8') as output_json_file:
     json.dump(all_code_blocks, output_json_file, indent=4)
 
 print("All code blocks are stored in the output JSON file:", output_json_path)
+print("Total number of keys:", total_keys)
