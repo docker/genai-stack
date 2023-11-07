@@ -65,7 +65,7 @@ def load_llm(llm_name: str, logger=BaseLogger(), config={}):
             # seed=2,
             top_k=10,  # A higher value (100) will give more diverse answers, while a lower value (10) will be more conservative.
             top_p=0.3,  # Higher value (0.95) will lead to more diverse text, while a lower value (0.5) will generate more focused text.
-            num_ctx=3072,  # Sets the size of the context window used to generate the next token.
+            num_ctx=10072,  # Sets the size of the context window used to generate the next token.
         )
     logger.info("LLM: Using GPT-3.5")
     return ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo", streaming=True)
@@ -128,35 +128,23 @@ def configure_qa_rag_chain(llm, embeddings, embeddings_store_url, username, pass
     )
 
     # Vector + Knowledge Graph response
-    kg = Neo4jVector.from_existing_index(
+    kg=Neo4jVector.from_existing_index(
         embedding=embeddings,
         url=embeddings_store_url,
         username=username,
         password=password,
         database="neo4j",  # neo4j by default
-        index_name="stackoverflow",  # vector by default
         text_node_property="body",  # text by default
         retrieval_query="""
-    WITH node AS question, score AS similarity
-    CALL  { with question
-        MATCH (question)<-[:ANSWERS]-(answer)
-        WITH answer
-        ORDER BY answer.is_accepted DESC, answer.score DESC
-        WITH collect(answer)[..2] as answers
-        RETURN reduce(str='', answer IN answers | str + 
-                '\n### Answer (Accepted: '+ answer.is_accepted +
-                ' Score: ' + answer.score+ '): '+  answer.body + '\n') as answerTexts
-    } 
-    RETURN '##Question: ' + question.title + '\n' + question.body + '\n' 
-        + answerTexts AS text, similarity as score, {source: question.link} AS metadata
-    ORDER BY similarity ASC // so that best answers are the last
-    """,
-    )
-
+            MATCH (f:File)-[:CONTAINS]->(c:Code)
+            RETURN f.name AS file_name, f.path AS file_path, COLLECT(c) AS code_nodes
+        """,)
+    
+    print(kg)
     kg_qa = RetrievalQAWithSourcesChain(
         combine_documents_chain=qa_chain,
         retriever=kg.as_retriever(search_kwargs={"k": 2}),
         reduce_k_below_max_tokens=False,
-        max_tokens_limit=3375,
+        max_tokens_limit=10075,
     )
     return kg_qa
