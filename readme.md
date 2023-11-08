@@ -108,10 +108,15 @@ DB client: http://localhost:7474
 UI: http://localhost:8502
 DB client: http://localhost:7474
 
+- run this app first to load the data for chatbot
 - import recent Stack Overflow data for certain tags into a KG
 - embed questions and answers and store in vector index
 - UI: choose tags, run import, see progress, some stats of data in the database
-- Load high ranked questions (regardless of tags) to support the ticket generation feature of App 1.
+- load high ranked questions (regardless of tags) to support the ticket generation feature of App 1.
+- if you intend to change the embedding models, but seeing dimensions conflict problem, try to remove the graph data base by
+```
+rm -rf data
+```
 
 
 
