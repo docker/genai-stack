@@ -2,8 +2,6 @@
     import { createEventDispatcher, onMount } from "svelte";
     import { generationStates, generationStore } from "./generation.store";
 
-    export let title;
-    export let text;
     /** @type {HTMLDialogElement | undefined}*/
     let modal;
 
