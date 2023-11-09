@@ -200,6 +200,11 @@ services:
             - front-end/
     ports:
       - 8504:8504
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 http://localhost:8504/ || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   front-end:
     build:
