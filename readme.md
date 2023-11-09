@@ -1,6 +1,5 @@
 # GenAI Stack
-This GenAI application stack will get you started building your
-own GenAI application in no time.
+The GenAI Stack will get you started building your own GenAI application in no time.
 The demo applications can serve as inspiration or as a starting point.
 Learn more about the details in the [technical blog post](https://neo4j.com/developer-blog/genai-app-how-to-build/).
 
@@ -37,6 +36,8 @@ Install [Ollama](https://ollama.ai) on MacOS and start it before running `docker
 No need to install Ollama manually, it will run in a container as
 part of the stack when running with the Linux profile: run `docker compose --profile linux up`.
 Make sure to set the `OLLAMA_BASE_URL=http://llm:11434` in the `.env` file when using Ollama docker container.
+
+To use the Linux-GPU profile: run `docker compose --profile linux-gpu up`. Also change `OLLAMA_BASE_URL=http://llm-gpu:11434` in the `.env` file.
 
 **Windows**
 Not supported by Ollama, so Windows users need to generate a OpenAI API key and configure the stack to use `gpt-3.5` or `gpt-4` in the `.env` file.
