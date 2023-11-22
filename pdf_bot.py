@@ -84,7 +84,7 @@ def main():
         )
 
         # Accept user questions/query
-        query = st.text_input("Ask questions about related your upload pdf file")
+        query = st.text_input("Ask questions about your PDF file")
 
         if query:
             stream_handler = StreamHandler(st.empty())
