@@ -103,7 +103,7 @@ def configure_qa_rag_chain(llm, embeddings, embeddings_store_url, username, pass
     Use the following pieces of context to answer the question at the end.
     The context contains question-answer pairs and their links from Stackoverflow.
     You should prefer information from accepted or more upvoted answers.
-    Make sure to rely on information from the answers and not on questions to provide accuate responses.
+    Make sure to rely on information from the answers and not on questions to provide accurate responses.
     When you find particular answer in the context useful, make sure to cite it in the answer using the link.
     If you don't know the answer, just say that you don't know, don't try to make up an answer.
     ----
