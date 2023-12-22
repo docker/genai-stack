@@ -27,7 +27,7 @@ Available variables:
 
 ## LLM Configuration
 MacOS and Linux users can use any LLM that's available via Ollama. Check the "tags" section under the model page you want to use on https://ollama.ai/library and write the tag for the value of the environment variable `LLM=` in the `.env` file.
-All platforms can use GPT-3.5-turbo and GPT-4 (bring your own API keys for OpenAIs models).
+All platforms can use GPT-3.5-turbo and GPT-4 (bring your own API keys for OpenAI models).
 
 **MacOS**
 Install [Ollama](https://ollama.ai) on MacOS and start it before running `docker compose up`.
@@ -40,7 +40,7 @@ Make sure to set the `OLLAMA_BASE_URL=http://llm:11434` in the `.env` file when 
 To use the Linux-GPU profile: run `docker compose --profile linux-gpu up`. Also change `OLLAMA_BASE_URL=http://llm-gpu:11434` in the `.env` file.
 
 **Windows**
-Not supported by Ollama, so Windows users need to generate a OpenAI API key and configure the stack to use `gpt-3.5` or `gpt-4` in the `.env` file.
+Not supported by Ollama, so Windows users need to generate an OpenAI API key and configure the stack to use `gpt-3.5` or `gpt-4` in the `.env` file.
 # Develop
 
 > [!WARNING]
@@ -50,7 +50,7 @@ Not supported by Ollama, so Windows users need to generate a OpenAI API key and 
 ```
 docker compose up
 ```
-If changes to build scripts has been made, **rebuild**.
+If changes to build scripts have been made, **rebuild**.
 ```
 docker compose up --build
 ```
@@ -77,7 +77,7 @@ Here's what's in this repo:
 | Support Bot | `bot.py` | `bot` | http://localhost:8501 | Main usecase. Fullstack Python application. |
 | Stack Overflow Loader | `loader.py` | `loader` | http://localhost:8502 | Load SO data into the database (create vector embeddings etc). Fullstack Python application. |
 | PDF Reader | `pdf_bot.py` | `pdf_bot` | http://localhost:8503 | Read local PDF and ask it questions. Fullstack Python application. |
-| Standalone Bot API | `api.py` | `api` | http://localhost:8504 | Standalone HTTP API streaming (SSE) + non-streaming endpoints. Python. |
+| Standalone Bot API | `api.py` | `api` | http://localhost:8504 | Standalone HTTP API streaming (SSE) + non-streaming endpoints Python. |
 | Standalone Bot UI | `front-end/` | `front-end` | http://localhost:8505 | Standalone client that uses the Standalone Bot API to interact with the model. JavaScript (Svelte) front-end. |
 
 The database can be explored at http://localhost:7474.
@@ -110,7 +110,7 @@ UI: http://localhost:8502
 DB client: http://localhost:7474
 
 - import recent Stack Overflow data for certain tags into a KG
-- embed questions and answers and store in vector index
+- embed questions and answers and store them in vector index
 - UI: choose tags, run import, see progress, some stats of data in the database
 - Load high ranked questions (regardless of tags) to support the ticket generation feature of App 1.
 
