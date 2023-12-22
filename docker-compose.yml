@@ -1,20 +1,33 @@
 services:
 
-  llm:
+  llm: &llm
     image: ollama/ollama:latest
     profiles: ["linux"]
     networks:
       - net
 
+  llm-gpu:
+    <<: *llm
+    profiles: ["linux-gpu"]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
   pull-model:
     image: genai-stack/pull-model:latest
     build:
+      context: .
       dockerfile: pull_model.Dockerfile
     environment:
       - OLLAMA_BASE_URL=${OLLAMA_BASE_URL-http://host.docker.internal:11434}
       - LLM=${LLM-llama2}
     networks:
       - net
+    tty: true
 
   database:
     image: neo4j:5.11
@@ -37,6 +50,7 @@ services:
 
   loader:
     build:
+      context: .
       dockerfile: loader.Dockerfile
     volumes:
       - $PWD/embedding_model:/embedding_model
@@ -77,6 +91,7 @@ services:
 
   bot:
     build:
+      context: .
       dockerfile: bot.Dockerfile
     volumes:
       - $PWD/embedding_model:/embedding_model
@@ -116,6 +131,7 @@ services:
 
   pdf_bot:
     build:
+      context: .
       dockerfile: pdf_bot.Dockerfile
     environment:
       - NEO4J_URI=${NEO4J_URI-neo4j://database:7687}
@@ -153,6 +169,7 @@ services:
 
   api:
     build:
+      context: .
       dockerfile: api.Dockerfile
     volumes:
       - $PWD/embedding_model:/embedding_model
@@ -189,9 +206,15 @@ services:
             - front-end/
     ports:
       - 8504:8504
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 http://localhost:8504/ || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   front-end:
     build:
+      context: .
       dockerfile: front-end.Dockerfile
     x-develop:
       watch:
