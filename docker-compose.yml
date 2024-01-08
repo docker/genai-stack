@@ -30,6 +30,7 @@ services:
     tty: true
 
   database:
+    user: neo4j:neo4j
     image: neo4j:5.11
     ports:
       - 7687:7687
