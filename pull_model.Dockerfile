@@ -26,7 +26,7 @@ COPY <<EOF pull_model.clj
         (async/go-loop [n 0]
           (let [[v _] (async/alts! [done (async/timeout 5000)])]
             (if (= :stop v) :stopped (do (println (format "... pulling model (%ss) - will take several minutes" (* n 10))) (recur (inc n))))))
-        (process/shell {:env {"OLLAMA_HOST" url} :out :inherit :err :inherit} (format "./bin/ollama pull %s" llm))
+        (process/shell {:env {"OLLAMA_HOST" url} :out :inherit :err :inherit} (format "bash -c './bin/ollama show %s --modelfile > /dev/null || ./bin/ollama pull %s'" llm llm))
         (async/>!! done :stop))
 
       (println "OLLAMA model only pulled if both LLM and OLLAMA_BASE_URL are set and the LLM model is not gpt")))
