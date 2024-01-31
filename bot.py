@@ -3,7 +3,7 @@ import os
 import streamlit as st
 from streamlit.logger import get_logger
 from langchain.callbacks.base import BaseCallbackHandler
-from langchain.graphs import Neo4jGraph
+from langchain_community.graphs import Neo4jGraph
 from dotenv import load_dotenv
 from utils import (
     create_vector_index,
