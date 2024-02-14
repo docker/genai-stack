@@ -43,9 +43,9 @@ services:
       - NEO4J_db_tx__log_rotation_retention__policy=false
     healthcheck:
         test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:7474 || exit 1"]
-        interval: 5s
-        timeout: 3s
-        retries: 5
+        interval: 15s
+        timeout: 30s
+        retries: 10
     networks:
       - net
 
