@@ -30,7 +30,7 @@ MacOS and Linux users can use any LLM that's available via Ollama. Check the "ta
 All platforms can use GPT-3.5-turbo and GPT-4 (bring your own API keys for OpenAI models).
 
 **MacOS**
-Install [Ollama](https://ollama.ai) on MacOS and start it before running `docker compose up`.
+Install [Ollama](https://ollama.ai) on MacOS and start it before running `docker compose up` using `ollama serve` in a separate terminal.
 
 **Linux**
 No need to install Ollama manually, it will run in a container as
@@ -40,7 +40,7 @@ Make sure to set the `OLLAMA_BASE_URL=http://llm:11434` in the `.env` file when 
 To use the Linux-GPU profile: run `docker compose --profile linux-gpu up`. Also change `OLLAMA_BASE_URL=http://llm-gpu:11434` in the `.env` file.
 
 **Windows**
-Not supported by Ollama, so Windows users need to generate an OpenAI API key and configure the stack to use `gpt-3.5` or `gpt-4` in the `.env` file.
+Ollama now supports Windows. Install [Ollama](https://ollama.ai) on Windows and start it before running `docker compose up` using `ollama serve` in a separate terminal. Alternatively, Windows users can generate an OpenAI API key and configure the stack to use `gpt-3.5` or `gpt-4` in the `.env` file.
 # Develop
 
 > [!WARNING]
