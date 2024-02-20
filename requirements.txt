@@ -1,4 +1,4 @@
-openai==0.28.1
+openai
 python-dotenv
 wikipedia
 tiktoken
@@ -13,3 +13,7 @@ pydantic
 uvicorn
 sse-starlette
 boto3
+# missing from the langchain base image?
+langchain-openai
+langchain-community
+langchain-google-genai
