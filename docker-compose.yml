@@ -44,9 +44,9 @@ services:
       - NEO4J_dbms_security_procedures_unrestricted=apoc.*
     healthcheck:
         test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:7474 || exit 1"]
-        interval: 5s
-        timeout: 3s
-        retries: 5
+        interval: 15s
+        timeout: 30s
+        retries: 10
     networks:
       - net
 
@@ -61,6 +61,7 @@ services:
       - NEO4J_PASSWORD=${NEO4J_PASSWORD-password}
       - NEO4J_USERNAME=${NEO4J_USERNAME-neo4j}
       - OPENAI_API_KEY=${OPENAI_API_KEY-}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY-}      
       - OLLAMA_BASE_URL=${OLLAMA_BASE_URL-http://host.docker.internal:11434}
       - EMBEDDING_MODEL=${EMBEDDING_MODEL-sentence_transformer}
       - LANGCHAIN_ENDPOINT=${LANGCHAIN_ENDPOINT-"https://api.smith.langchain.com"}
@@ -101,7 +102,8 @@ services:
       - NEO4J_URI=${NEO4J_URI-neo4j://database:7687}
       - NEO4J_PASSWORD=${NEO4J_PASSWORD-password}
       - NEO4J_USERNAME=${NEO4J_USERNAME-neo4j}
-      - OPENAI_API_KEY=${OPENAI_API_KEY-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY-}      
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY-}
       - OLLAMA_BASE_URL=${OLLAMA_BASE_URL-http://host.docker.internal:11434}
       - LLM=${LLM-llama2}
       - EMBEDDING_MODEL=${EMBEDDING_MODEL-sentence_transformer}
@@ -140,6 +142,7 @@ services:
       - NEO4J_PASSWORD=${NEO4J_PASSWORD-password}
       - NEO4J_USERNAME=${NEO4J_USERNAME-neo4j}
       - OPENAI_API_KEY=${OPENAI_API_KEY-}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY-}
       - OLLAMA_BASE_URL=${OLLAMA_BASE_URL-http://host.docker.internal:11434}
       - LLM=${LLM-llama2}
       - EMBEDDING_MODEL=${EMBEDDING_MODEL-sentence_transformer}
@@ -180,6 +183,7 @@ services:
       - NEO4J_PASSWORD=${NEO4J_PASSWORD-password}
       - NEO4J_USERNAME=${NEO4J_USERNAME-neo4j}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}  
       - OLLAMA_BASE_URL=${OLLAMA_BASE_URL-http://host.docker.internal:11434}
       - LLM=${LLM-llama2}
       - EMBEDDING_MODEL=${EMBEDDING_MODEL-sentence_transformer}
