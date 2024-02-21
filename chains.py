@@ -33,10 +33,18 @@ def load_embedding_model(embedding_model_name: str, logger=BaseLogger(), config=
         )
         dimension = 4096
         logger.info("Embedding: Using Ollama")
-    elif embedding_model_name == "openai":
-        embeddings = OpenAIEmbeddings()
+    elif embedding_model_name == "openai-embedding-3-small":
+        embeddings = OpenAIEmbeddings(
+            model="text-embedding-3-small"
+        )
         dimension = 1536
-        logger.info("Embedding: Using OpenAI")
+        logger.info("Embedding: Using OpenAI text-embedding-3-small")
+    elif embedding_model_name == "openai-embedding-3-large":
+        embeddings = OpenAIEmbeddings(
+            model="text-embedding-3-large"
+        )
+        dimension = 3072
+        logger.info("Embedding: Using OpenAI text-embedding-3-large")
     elif embedding_model_name == "aws":
         embeddings = BedrockEmbeddings()
         dimension = 1536

@@ -15,12 +15,11 @@ Available variables:
 | NEO4J_USERNAME         | neo4j                              | REQUIRED - Username for Neo4j database                                  |
 | NEO4J_PASSWORD         | password                           | REQUIRED - Password for Neo4j database                                  |
 | LLM                    | llama2                             | REQUIRED - Can be any Ollama model tag, or gpt-4 or gpt-3.5 or claudev2 |
-| EMBEDDING_MODEL        | sentence_transformer               | REQUIRED - Can be sentence_transformer, openai, aws, ollama or google-genai-embedding-001|
+| EMBEDDING_MODEL        | sentence_transformer               | REQUIRED - Can be sentence_transformer, openai-embedding-3-small, openai-embedding-3-large, aws, ollama or google-genai-embedding-001 |
 | AWS_ACCESS_KEY_ID      |                                    | REQUIRED - Only if LLM=claudev2 or embedding_model=aws                  |
 | AWS_SECRET_ACCESS_KEY  |                                    | REQUIRED - Only if LLM=claudev2 or embedding_model=aws                  |
 | AWS_DEFAULT_REGION     |                                    | REQUIRED - Only if LLM=claudev2 or embedding_model=aws                  |
-| OPENAI_API_KEY         |                                    | REQUIRED - Only if LLM=gpt-4 or LLM=gpt-3.5 or embedding_model=openai   |
-| GOOGLE_API_KEY         |                                    | REQUIRED - Only required when using GoogleGenai LLM or embedding model google-genai-embedding-001|
+| OPENAI_API_KEY         |                                    | REQUIRED - Only if LLM=gpt-4 or LLM=gpt-3.5 or embedding_model=openai-* |
 | LANGCHAIN_ENDPOINT     | "https://api.smith.langchain.com"  | OPTIONAL - URL to Langchain Smith API                                   |
 | LANGCHAIN_TRACING_V2   | false                              | OPTIONAL - Enable Langchain tracing v2                                  |
 | LANGCHAIN_PROJECT      |                                    | OPTIONAL - Langchain project name                                       |
