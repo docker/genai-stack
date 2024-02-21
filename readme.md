@@ -15,7 +15,7 @@ Available variables:
 | NEO4J_USERNAME         | neo4j                              | REQUIRED - Username for Neo4j database                                  |
 | NEO4J_PASSWORD         | password                           | REQUIRED - Password for Neo4j database                                  |
 | LLM                    | llama2                             | REQUIRED - Can be any Ollama model tag, or gpt-4 or gpt-3.5 or claudev2 |
-| EMBEDDING_MODEL        | sentence_transformer               | REQUIRED - Can be sentence_transformer, openai-embedding-3-small, openai-embedding-3-large, aws or ollama           |
+| EMBEDDING_MODEL        | sentence_transformer               | REQUIRED - Can be sentence_transformer, openai-embedding-3-small, openai-embedding-3-large, aws, ollama or google-genai-embedding-001 |
 | AWS_ACCESS_KEY_ID      |                                    | REQUIRED - Only if LLM=claudev2 or embedding_model=aws                  |
 | AWS_SECRET_ACCESS_KEY  |                                    | REQUIRED - Only if LLM=claudev2 or embedding_model=aws                  |
 | AWS_DEFAULT_REGION     |                                    | REQUIRED - Only if LLM=claudev2 or embedding_model=aws                  |
