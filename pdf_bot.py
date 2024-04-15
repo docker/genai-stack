@@ -77,7 +77,7 @@ def main():
             embedding=embeddings,
             index_name="pdf_bot",
             node_label="PdfBotChunk",
-            pre_delete_collection=True,  # Delete existing PDF data
+            pre_delete_collection=False,  # Delete existing PDF data
         )
         qa = RetrievalQA.from_chain_type(
             llm=llm, chain_type="stuff", retriever=vectorstore.as_retriever()
