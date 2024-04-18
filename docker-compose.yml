@@ -23,7 +23,7 @@ services:
       context: .
       dockerfile: pull_model.Dockerfile
     environment:
-      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL-http://host.docker.internal:11434}
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL-localhost:11434}
       - LLM=${LLM-llama2}
     networks:
       - net
@@ -35,8 +35,8 @@ services:
     ports:
       - 7687:7687
       - 7474:7474
-    volumes:
-      - $PWD/data:/data
+    #volumes:
+     # - $PWD/data:/data
     environment:
       - NEO4J_AUTH=${NEO4J_USERNAME-neo4j}/${NEO4J_PASSWORD-password}
       - NEO4J_PLUGINS=["apoc"]
