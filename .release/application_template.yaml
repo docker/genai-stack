@@ -1,0 +1,183 @@
+---
+auto_deploy: true
+context: release-ry6clz
+domain: ai-playground.releaseapp.io
+repo_name: awesome-release/genai-stack
+app_imports:
+- name: ollama
+hostnames:
+- api: api-${env_id}.${domain}
+- bot: bot-${env_id}.${domain}
+- front-end: front-end-${env_id}.${domain}
+- loader: loader-${env_id}.${domain}
+- pdf-bot: pdf-bot-${env_id}.${domain}
+environment_templates:
+- name: ephemeral
+- name: permanent
+resources:
+  cpu:
+    limits: 1000m
+    requests: 100m
+  memory:
+    limits: 1Gi
+    requests: 100Mi
+  replicas: 1
+services:
+- name: api
+  image: awesome-release/genai-stack/api
+  build:
+    context: "."
+    dockerfile: api.Dockerfile
+  has_repo: true
+  volumes: []
+  command:
+  - uvicorn
+  - api:app
+  - "--host"
+  - 0.0.0.0
+  - "--port"
+  - '8504'
+  readiness_probe:
+    http_get:
+      path: "/"
+      port: 8504
+    period_seconds: 5
+    timeout_seconds: 3
+    failure_threshold: 5
+    initial_delay_seconds: 0
+  ports:
+  - type: node_port
+    target_port: '8504'
+    port: '8504'
+    loadbalancer: false
+- name: bot
+  image: awesome-release/genai-stack/bot
+  build:
+    context: "."
+    dockerfile: bot.Dockerfile
+  has_repo: true
+  volumes: []
+  command:
+  - streamlit
+  - run
+  - bot.py
+  - "--server.port=8501"
+  - "--server.address=0.0.0.0"
+  ports:
+  - type: node_port
+    target_port: '8501'
+    port: '8501'
+    loadbalancer: false
+- name: database
+  image: neo4j:5.11
+  has_repo: false
+  volumes: []
+  readiness_probe:
+    http_get:
+      path: "/"
+      port: 7474
+    period_seconds: 15
+    timeout_seconds: 30
+    failure_threshold: 10
+    initial_delay_seconds: 0
+  ports:
+  - type: node_port
+    target_port: '7474'
+    port: '7474'
+    loadbalancer: false
+  - type: node_port
+    target_port: '7687'
+    port: '7687'
+    loadbalancer: false
+- name: front-end
+  static: true
+  build_base: front-end
+  build_output_directory: dist/
+  build_package_install_command: npm install
+  build_command: npm run build
+- name: loader
+  image: awesome-release/genai-stack/loader
+  build:
+    context: "."
+    dockerfile: loader.Dockerfile
+  has_repo: true
+  volumes: []
+  command:
+  - streamlit
+  - run
+  - loader.py
+  - "--server.port=8502"
+  - "--server.address=0.0.0.0"
+  ports:
+  - type: node_port
+    target_port: '8502'
+    port: '8502'
+    loadbalancer: false
+  - type: node_port
+    target_port: '8080'
+    port: '8081'
+    loadbalancer: false
+- name: pdf-bot
+  image: awesome-release/genai-stack/pdf_bot
+  build:
+    context: "."
+    dockerfile: pdf_bot.Dockerfile
+  has_repo: true
+  command:
+  - streamlit
+  - run
+  - pdf_bot.py
+  - "--server.port=8503"
+  - "--server.address=0.0.0.0"
+  ports:
+  - type: node_port
+    target_port: '8503'
+    port: '8503'
+    loadbalancer: false
+- name: pull-model
+  image: awesome-release/genai-stack/pull-model
+  build:
+    context: "."
+    dockerfile: pull_model.Dockerfile
+  has_repo: true
+  command:
+  - bb
+  - "-f"
+  - pull_model.clj
+jobs:
+- name: pull-model
+  from_services: pull-model
+workflows:
+- name: setup
+  parallelize:
+  - step: services-2
+    wait_for_finish: false
+    tasks:
+    - services.front-end
+  - step: services-0
+    tasks:
+    - services.database
+    - jobs.pull-model
+  - step: services-1
+    tasks:
+    - services.api
+    - services.bot
+    - services.loader
+    - services.pdf-bot
+- name: patch
+  parallelize:
+  - step: services-2
+    wait_for_finish: false
+    tasks:
+    - services.front-end
+  - step: services-1
+    tasks:
+    - services.api
+    - services.bot
+    - services.loader
+    - services.pdf-bot
+- name: teardown
+  parallelize:
+  - step: remove-environment
+    tasks:
+    - release.remove_environment

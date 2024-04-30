@@ -1,0 +1,110 @@
+---
+defaults: []
+services:
+  api:
+  - key: LLM
+    value: llama2
+  - key: NEO4J_URI
+    value: neo4j://database:7687
+  - key: NEO4J_PASSWORD
+    value: password
+  - key: NEO4J_USERNAME
+    value: neo4j
+  - key: OPENAI_API_KEY
+    value: "$secrets.aws./openai/api-token"
+  - key: EMBEDDING_MODEL
+    value: sentence_transformer
+  - key: OLLAMA_BASE_URL
+    value: http://ollama:11434
+  - key: LANGCHAIN_API_KEY
+    value: NONE
+  - key: LANGCHAIN_PROJECT
+    value: LANGCHAIN_PROJECT
+  - key: LANGCHAIN_ENDPOINT
+    value: https://api.smith.langchain.com
+  - key: LANGCHAIN_TRACING_V2
+    value: 'false'
+  bot:
+  - key: LLM
+    value: llama2
+  - key: NEO4J_URI
+    value: neo4j://database:7687
+  - key: NEO4J_PASSWORD
+    value: password
+  - key: NEO4J_USERNAME
+    value: neo4j
+  - key: OPENAI_API_KEY
+    value: "$secrets.aws./openai/api-token"
+  - key: EMBEDDING_MODEL
+    value: sentence_transformer
+  - key: OLLAMA_BASE_URL
+    value: http://ollama:11434
+  - key: LANGCHAIN_API_KEY
+    value: NONE
+  - key: LANGCHAIN_PROJECT
+    value: LANGCHAIN_PROJECT
+  - key: LANGCHAIN_ENDPOINT
+    value: https://api.smith.langchain.com
+  - key: LANGCHAIN_TRACING_V2
+    value: 'false'
+  database:
+  - key: NEO4J_AUTH
+    value: neo4j/password
+  - key: NEO4J_PLUGINS
+    value: '["apoc"]'
+  - key: NEO4J_db_tx__log_rotation_retention__policy
+    value: 'false'
+  - key: NEO4J_dbms_security_procedures_unrestricted
+    value: apoc.*
+  front-end: []
+  loader:
+  - key: NEO4J_URI
+    value: neo4j://database:7687
+  - key: NEO4J_PASSWORD
+    value: password
+  - key: NEO4J_USERNAME
+    value: neo4j
+  - key: OPENAI_API_KEY
+    value: "$secrets.aws./openai/api-token"
+  - key: EMBEDDING_MODEL
+    value: sentence_transformer
+  - key: OLLAMA_BASE_URL
+    value: http://ollama:11434
+  - key: LANGCHAIN_API_KEY
+    value: NONE
+  - key: LANGCHAIN_PROJECT
+    value: LANGCHAIN_PROJECT
+  - key: LANGCHAIN_ENDPOINT
+    value: https://api.smith.langchain.com
+  - key: LANGCHAIN_TRACING_V2
+    value: 'false'
+  pdf-bot:
+  - key: LLM
+    value: llama2
+  - key: NEO4J_URI
+    value: neo4j://database:7687
+  - key: NEO4J_PASSWORD
+    value: password
+  - key: NEO4J_USERNAME
+    value: neo4j
+  - key: OPENAI_API_KEY
+    value: "$secrets.aws./openai/api-token"
+  - key: EMBEDDING_MODEL
+    value: sentence_transformer
+  - key: OLLAMA_BASE_URL
+    value: http://ollama:11434
+  - key: LANGCHAIN_API_KEY
+    value: NONE
+  - key: LANGCHAIN_PROJECT
+    value: LANGCHAIN_PROJECT
+  - key: LANGCHAIN_ENDPOINT
+    value: https://api.smith.langchain.com
+  - key: LANGCHAIN_TRACING_V2
+    value: 'false'
+  pull-model:
+  - key: LLM
+    value: llama2
+  - key: OLLAMA_BASE_URL
+    value: http://ollama:11434
+mapping:
+  VITE_API_BASE_URL: "$API_INGRESS_URL"
