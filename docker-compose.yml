@@ -19,26 +19,33 @@ services:
 
   pull-model:
     image: genai-stack/pull-model:latest
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     build:
       context: .
       dockerfile: pull_model.Dockerfile
     environment:
       - OLLAMA_BASE_URL=${OLLAMA_BASE_URL-http://host.docker.internal:11434}
-      - LLM=${LLM-llama2}
+      - LLM=${LLM-llama3}
     networks:
       - net
     tty: true
 
   database:
     user: neo4j:neo4j
-    image: neo4j:5.11
+    image: ${NEO4J_DOCKER_IMAGE}
     ports:
       - 7687:7687
       - 7474:7474
     volumes:
-      - $PWD/data:/data
+      - ./data:/data
+      - ./logs:/logs
+      - ./import:/import
     environment:
+      - NEO4J_ACCEPT_LICENSE_AGREEMENT=${NEO4J_ACCEPT_LICENSE_AGREEMENT}
       - NEO4J_AUTH=${NEO4J_USERNAME-neo4j}/${NEO4J_PASSWORD-password}
+      - NEO4J_EDITION=${NEO4J_EDITION}
+      - NEO4J_initial_server_mode__constraint=PRIMARY
       - NEO4J_PLUGINS=["apoc"]
       - NEO4J_db_tx__log_rotation_retention__policy=false
       - NEO4J_dbms_security_procedures_unrestricted=apoc.*

@@ -1,12 +1,9 @@
 
-from langchain_openai import OpenAIEmbeddings
-from langchain_community.embeddings import OllamaEmbeddings
-from langchain_community.embeddings import BedrockEmbeddings
+from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from langchain_community.embeddings import OllamaEmbeddings, BedrockEmbeddings
 from langchain_community.embeddings.sentence_transformer import SentenceTransformerEmbeddings
 
-from langchain_openai import ChatOpenAI
-from langchain_community.chat_models import ChatOllama
-from langchain_community.chat_models import BedrockChat
+from langchain_community.chat_models import ChatOllama, BedrockChat
 
 from langchain_community.graphs import Neo4jGraph
 
