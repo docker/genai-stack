@@ -22,6 +22,14 @@ resources:
     limits: 1Gi
     requests: 100Mi
   replicas: 1
+ingress:
+  proxy_body_size: 30m
+  proxy_buffer_size: 64k
+  proxy_buffering: true
+  proxy_buffers_number: 4
+  proxy_max_temp_file_size: 1024m
+  proxy_read_timeout: "180"
+  proxy_send_timeout: "180"
 services:
 - name: api
   image: awesome-release/genai-stack/api
