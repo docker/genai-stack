@@ -3,14 +3,13 @@ auto_deploy: true
 context: release-ry6clz
 domain: ai-playground.releaseapp.io
 repo_name: awesome-release/genai-stack
-app_imports:
-- name: ollama
 hostnames:
 - api: api-${env_id}.${domain}
 - bot: bot-${env_id}.${domain}
 - front-end: front-end-${env_id}.${domain}
 - loader: loader-${env_id}.${domain}
 - pdf-bot: pdf-bot-${env_id}.${domain}
+- ollama: ollama-${env_id}.${domain}
 environment_templates:
 - name: ephemeral
 - name: permanent
@@ -28,9 +27,56 @@ ingress:
   proxy_buffering: true
   proxy_buffers_number: 4
   proxy_max_temp_file_size: 1024m
-  proxy_read_timeout: "180"
-  proxy_send_timeout: "180"
+  proxy_read_timeout: '180'
+  proxy_send_timeout: '180'
+shared_volumes:
+- name: models
+  size: 40Gi
+  type: persistent
+parameters:
+- name: llm
+  type: string
+  description: Can be any Ollama model tag, or gpt-4 or gpt-3.5 or claudev2
+  default: llama2
+- name: embedding_model
+  type: string
+  description: Can be sentence_transformer, openai, aws, ollama or google-genai-embedding-001
+  default: sentence_transformer
 services:
+- name: ollama
+  image: ollama/ollama
+  command:
+  - "/bin/ollama"
+  args:
+  - serve
+  envs:
+  - key: LLM
+    value: "${parameters.llm}"
+  - key: EMBEDDING_MODEL
+    value: "${parameters.embedding_model}"
+  memory:
+    limits: 64Gi
+    requests: 16Gi
+  cpu:
+    limits: 128
+    requests: 12
+  ports:
+  - type: node_port
+    target_port: '11434'
+    port: '11434'
+    loadbalancer: false
+  node_selector:
+  - key: nvidia.com/gpu
+    value: 'true'
+  - key: beta.kubernetes.io/instance-type
+    value: g5.12xlarge
+  volumes:
+  - name: shmem
+    type: shmem
+    size: 16Gi
+    mount_path: "/dev/shm"
+  - claim: models
+    mount_path: "/models"
 - name: api
   image: awesome-release/genai-stack/api
   build:
@@ -45,6 +91,11 @@ services:
   - 0.0.0.0
   - "--port"
   - '8504'
+  envs:
+  - key: LLM
+    value: "${parameters.llm}"
+  - key: EMBEDDING_MODEL
+    value: "${parameters.embedding_model}"
   readiness_probe:
     http_get:
       path: "/"
@@ -71,6 +122,11 @@ services:
   - bot.py
   - "--server.port=8501"
   - "--server.address=0.0.0.0"
+  envs:
+  - key: LLM
+    value: "${parameters.llm}"
+  - key: EMBEDDING_MODEL
+    value: "${parameters.embedding_model}"
   ports:
   - type: node_port
     target_port: '8501'
@@ -137,6 +193,11 @@ services:
   - pdf_bot.py
   - "--server.port=8503"
   - "--server.address=0.0.0.0"
+  envs:
+  - key: LLM
+    value: "${parameters.llm}"
+  - key: EMBEDDING_MODEL
+    value: "${parameters.embedding_model}"
   ports:
   - type: node_port
     target_port: '8503'
@@ -155,18 +216,26 @@ services:
 jobs:
 - name: pull-model
   from_services: pull-model
+  envs:
+  - key: LLM
+    value: "${parameters.llm}"
+  - key: EMBEDDING_MODEL
+    value: "${parameters.embedding_model}"
 workflows:
 - name: setup
   parallelize:
-  - step: services-2
+  - step: services-parallel
     wait_for_finish: false
     tasks:
     - services.front-end
   - step: services-0
     tasks:
     - services.database
-    - jobs.pull-model
+    - services.ollama
   - step: services-1
+    tasks:
+    - jobs.pull-model
+  - step: services-2
     tasks:
     - services.api
     - services.bot
@@ -174,7 +243,7 @@ workflows:
     - services.pdf-bot
 - name: patch
   parallelize:
-  - step: services-2
+  - step: services-parallel
     wait_for_finish: false
     tasks:
     - services.front-end
