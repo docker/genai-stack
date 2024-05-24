@@ -77,7 +77,7 @@ jobs:
             type=ref,event=tag
             type=ref,event=pr
 
-      - name: Build and push multi-platform Docker image: genai-stack/pull-model
+      - name: "Build and push multi-platform Docker image: genai-stack/pull-model"
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -90,7 +90,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build and push multi-platform Docker image: genai-stack/loader
+      - name: "Build and push multi-platform Docker image: genai-stack/loader"
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -103,7 +103,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build and push multi-platform Docker image: genai-stack/bot
+      - name: "Build and push multi-platform Docker image: genai-stack/bot"
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -116,7 +116,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build and push multi-platform Docker image: genai-stack/pdf-bot
+      - name: "Build and push multi-platform Docker image: genai-stack/pdf-bot"
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -129,7 +129,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build and push multi-platform Docker image: genai-stack/api
+      - name: "Build and push multi-platform Docker image: genai-stack/api"
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -142,7 +142,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build and push multi-platform Docker image: genai-stack/front-end
+      - name: "Build and push multi-platform Docker image: genai-stack/front-end"
         uses: docker/build-push-action@v5
         with:
           context: .
