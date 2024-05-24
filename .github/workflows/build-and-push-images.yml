@@ -1,0 +1,156 @@
+# This workflow will build a golang project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+
+name: Build Docker Images (amd64/arm64)
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [release-docker-build]
+    paths-ignore:
+      - '**.md'
+      - 'images/**/*'
+      - '.vscode/**/*'
+      - '**/.env.example'
+      - '.github/ISSUE_TEMPLATE/**/*'
+      - 'embed/**/*' # Embed should be published to frontend (yarn build:publish) if any changes are introduced
+
+
+jobs:
+  push_multi_platform_to_registries:
+    name: Push Docker multi-platform image to multiple registries
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Check if DockerHub build needed
+        shell: bash
+        run: |
+          # Check if the secret for USERNAME is set (don't even check for the password)
+          if [[ -z "${{ secrets.DOCKER_USERNAME }}" ]]; then
+            echo "DockerHub build not needed"
+            echo "enabled=false" >> $GITHUB_OUTPUT
+          else
+            echo "DockerHub build needed"
+            echo "enabled=true" >> $GITHUB_OUTPUT
+          fi
+        id: dockerhub
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        # Only login to the Docker Hub if the repo is awesome-release/genai-stack, to allow for forks to build on GHCR
+        if: steps.dockerhub.outputs.enabled == 'true' 
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      
+      - name: Log in to the Container registry
+        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+          images: |
+            ${{ steps.dockerhub.outputs.enabled == 'true' && 'awesome-release/genai-stack' || '' }}
+            ghcr.io/${{ github.repository }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=ref,event=branch
+            type=ref,event=tag
+            type=ref,event=pr
+
+      - name: Build and push multi-platform Docker image: genai-stack/pull-model
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./pull_model.Dockerfile
+          push: true
+          platforms: linux/amd64,linux/arm64
+          # tags: ${{ steps.meta.outputs.tags }}
+          tags: genai-stack/pull-model:latest
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push multi-platform Docker image: genai-stack/loader
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./loader.Dockerfile
+          push: true
+          platforms: linux/amd64,linux/arm64
+          # tags: ${{ steps.meta.outputs.tags }}
+          tags: genai-stack/loader:latest
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push multi-platform Docker image: genai-stack/bot
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./bot.Dockerfile
+          push: true
+          platforms: linux/amd64,linux/arm64
+          # tags: ${{ steps.meta.outputs.tags }}
+          tags: genai-stack/bot:latest
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push multi-platform Docker image: genai-stack/pdf-bot
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./pdf_bot.Dockerfile
+          push: true
+          platforms: linux/amd64,linux/arm64
+          # tags: ${{ steps.meta.outputs.tags }}
+          tags: genai-stack/pdf-bot:latest
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push multi-platform Docker image: genai-stack/api
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./api.Dockerfile
+          push: true
+          platforms: linux/amd64,linux/arm64
+          # tags: ${{ steps.meta.outputs.tags }}
+          tags: genai-stack/api:latest
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push multi-platform Docker image: genai-stack/front-end
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./front-end.Dockerfile
+          push: true
+          platforms: linux/amd64,linux/arm64
+          # tags: ${{ steps.meta.outputs.tags }}
+          tags: genai-stack/front-end:latest
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
