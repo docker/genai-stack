@@ -85,7 +85,7 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           # tags: ${{ steps.meta.outputs.tags }}
-          tags: releaseai/genai-stack/pull-model:latest
+          tags: releaseai/genai-stack-pull-model:latest
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -98,7 +98,7 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           # tags: ${{ steps.meta.outputs.tags }}
-          tags: releaseai/genai-stack/loader:latest
+          tags: releaseai/genai-stack-loader:latest
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -111,7 +111,7 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           # tags: ${{ steps.meta.outputs.tags }}
-          tags: releaseai/genai-stack/bot:latest
+          tags: releaseai/genai-stack-bot:latest
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -124,7 +124,7 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           # tags: ${{ steps.meta.outputs.tags }}
-          tags: releaseai/genai-stack/pdf-bot:latest
+          tags: releaseai/genai-stack-pdf-bot:latest
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -137,7 +137,7 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           # tags: ${{ steps.meta.outputs.tags }}
-          tags: releaseai/genai-stack/api:latest
+          tags: releaseai/genai-stack-api:latest
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -150,7 +150,7 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           # tags: ${{ steps.meta.outputs.tags }}
-          tags: releaseai/genai-stack/front-end:latest
+          tags: releaseai/genai-stack-front-end:latest
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
