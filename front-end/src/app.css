@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  min-width: 320px;
+  height: 100dvh;
+}
+
+#app {
+  height: 100%;
+}
+
+pre {
+  line-height: 1;
+  background-color: rgb(241, 241, 241);
+  padding: 4px 8px 8px;
+  border: 1px solid #ccc;
+  overflow-x: auto;
+  margin: 0 4px;
+  border-radius: 2px;
+}
+
+ol {
+  padding: 1em;
+  list-style: decimal;
+}

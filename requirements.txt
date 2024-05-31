@@ -1,7 +1,19 @@
-langchain
 openai
 python-dotenv
 wikipedia
 tiktoken
 neo4j
 streamlit
+sentence_transformers==2.2.2
+Pillow
+fastapi
+PyPDF2
+torch==2.0.1
+pydantic
+uvicorn
+sse-starlette
+boto3
+# missing from the langchain base image?
+langchain-openai
+langchain-community
+langchain-google-genai

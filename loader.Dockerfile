@@ -1,5 +1,4 @@
-# TODO Langchain base image
-FROM python:latest
+FROM langchain/langchain
 
 WORKDIR /app
 
@@ -13,11 +12,13 @@ COPY requirements.txt .
 
 RUN pip install --upgrade -r requirements.txt
 
-# COPY .env .
 COPY loader.py .
+COPY utils.py .
+COPY chains.py .
+COPY images ./images
 
 EXPOSE 8502
 
-HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health
+HEALTHCHECK CMD curl --fail http://localhost:8502/_stcore/health
 
 ENTRYPOINT ["streamlit", "run", "loader.py", "--server.port=8502", "--server.address=0.0.0.0"]

@@ -12,12 +12,10 @@ COPY requirements.txt .
 
 RUN pip install --upgrade -r requirements.txt
 
-COPY bot.py .
+COPY api.py .
 COPY utils.py .
 COPY chains.py .
 
-EXPOSE 8501
+HEALTHCHECK CMD curl --fail http://localhost:8504
 
-HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health
-
-ENTRYPOINT ["streamlit", "run", "bot.py", "--server.port=8501", "--server.address=0.0.0.0"]
+ENTRYPOINT [ "uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8504" ]

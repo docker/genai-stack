@@ -1,0 +1,22 @@
+{
+  "name": "bot-ui",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^2.4.2",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.31",
+    "svelte": "^4.0.5",
+    "tailwindcss": "^3.3.3",
+    "vite": "^4.4.12"
+  },
+  "dependencies": {
+    "svelte-markdown": "^0.4.0"
+  }
+}
