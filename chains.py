@@ -2,7 +2,7 @@
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.embeddings import BedrockEmbeddings
-from langchain_community.embeddings.sentence_transformer import SentenceTransformerEmbeddings
+from langchain_community.embeddings.huggingface import HuggingFaceEmbeddings
 
 from langchain_openai import ChatOpenAI
 from langchain_community.chat_models import ChatOllama
@@ -48,7 +48,7 @@ def load_embedding_model(embedding_model_name: str, logger=BaseLogger(), config=
         dimension = 768
         logger.info("Embedding: Using Google Generative AI Embeddings")
     else:
-        embeddings = SentenceTransformerEmbeddings(
+        embeddings = HuggingFaceEmbeddings(
             model_name="all-MiniLM-L6-v2", cache_folder="/embedding_model"
         )
         dimension = 384
