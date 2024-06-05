@@ -1,5 +1,6 @@
 import os
 import requests
+import mimetypes
 from dotenv import load_dotenv
 from langchain_community.graphs import Neo4jGraph
 import streamlit as st
@@ -7,6 +8,7 @@ from streamlit.logger import get_logger
 from chains import load_embedding_model
 from utils import create_constraints, create_vector_index
 from PIL import Image
+
 
 load_dotenv(".env")
 
@@ -20,8 +22,10 @@ os.environ["NEO4J_URL"] = url
 
 logger = get_logger(__name__)
 
-so_api_base_url = "https://api.stackexchange.com/2.3/search/advanced"
+#results = read_files_info('C:/SyncedFolder/Team Shares/FREA/')
 
+#so_api_base_url = "https://api.stackexchange.com/2.3/search/advanced"
+#next(results)
 embeddings, dimension = load_embedding_model(
     embedding_model_name, config={"ollama_base_url": ollama_base_url}, logger=logger
 )
@@ -31,6 +35,22 @@ neo4j_graph = Neo4jGraph(url=url, username=username, password=password)
 
 create_constraints(neo4j_graph)
 create_vector_index(neo4j_graph, dimension)
+
+def read_files_info(directory='.'):
+    #files_info = []
+    for root, dirs, files in os.walk(directory):
+        for filename in files:
+            file_path = os.path.join(root, filename)
+            info = os.stat(file_path)
+            file_info = {
+                'path': file_path,
+                'name': filename,
+                'type': mimetypes.guess_type(file_path)[0],
+                'size': os.path.getsize(file_path),
+                'creation_time': info.st_ctime, 
+                'modification_time': info.st_mtime  
+            }
+            yield file_info
 
 
 def load_so_data(tag: str = "neo4j", page: int = 1) -> None:
