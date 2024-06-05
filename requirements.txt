@@ -17,3 +17,7 @@ boto3
 langchain-openai
 langchain-community
 langchain-google-genai
+# Addtion needed packages
+os
+mintypes
+
