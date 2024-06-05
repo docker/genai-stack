@@ -52,20 +52,56 @@ def read_files_info(directory='.'):
             }
             yield file_info
 
+def get_file_info(file_path):
+    file_info = next(results)
+    switch_case(file_info['type'])  
+
+
+def switch_case(value):
+    switch = {
+        'text/html': funcWebPages,
+        'text/markdown': funcMarkdown,
+        'application/xml': funcXML,
+        'application/pdf': funcPDF,
+        'application/msword': funcDOC,
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': funcDOCX,
+        'application/vnd.ms-excel (XLS)': funcXLS,
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': funcXLSX,
+        'application/vnd.ms-powerpoint (PPT)': funcPPT,
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation': funcPPTX,
+        'application/rtf': funcRTF,
+        'image/jpeg': funcJPG,
+        'image/png': funcPNG,
+        'image/gif': funcGIF,
+        'image/bmp': funcBMP,
+        'image/tiff': funcTIFF,
+        'application/javascript': funcJavaScript,
+        'application/zip': funcZIP,
+        'application/gzip': funcGZIP,
+        'audio/mpeg': funcMP3,
+        'video/mp4': funcMP4,
+        'audio/wav': funcWAV,
+        'audio/ogg': funcOGG,
+        'video/webm': funcWEBM,
+        'application/json': funcJSON,
+        'application/x-yaml': funcYAML,
+        'application/epub+zip': funcEPUB,
+        'application/x-mobipocket-ebook': funcMOBI
+    }
+    func = switch.get(value, default_function)
+    func()
 
 def load_so_data(tag: str = "neo4j", page: int = 1) -> None:
-    parameters = (
-        f"?pagesize=100&page={page}&order=desc&sort=creation&answers=1&tagged={tag}"
-        "&site=stackoverflow&filter=!*236eb_eL9rai)MOSNZ-6D3Q6ZKb0buI*IVotWaTb"
-    )
-    data = requests.get(so_api_base_url + parameters).json()
+     parameters = (
+   
+     )
+    #data = requests.get(so_api_base_url + parameters).json()
     insert_so_data(data)
 
 
 def load_high_score_so_data() -> None:
     parameters = (
-        f"?fromdate=1664150400&order=desc&sort=votes&site=stackoverflow&"
-        "filter=!.DK56VBPooplF.)bWW5iOX32Fh1lcCkw1b_Y6Zkb7YD8.ZMhrR5.FRRsR6Z1uK8*Z5wPaONvyII"
+        
     )
     data = requests.get(so_api_base_url + parameters).json()
     insert_so_data(data)
