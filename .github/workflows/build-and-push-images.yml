@@ -103,6 +103,19 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: "Build and push multi-platform Docker image: genai-stack/custom-loader"
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./custom_loader.Dockerfile
+          push: true
+          platforms: linux/amd64,linux/arm64
+          # tags: ${{ steps.meta.outputs.tags }}
+          tags: releaseai/genai-stack-custom-loader:latest
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
       - name: "Build and push multi-platform Docker image: genai-stack/bot"
         uses: docker/build-push-action@v5
         with:
