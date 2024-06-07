@@ -13,6 +13,7 @@ COPY requirements.txt .
 RUN pip install --upgrade -r requirements.txt
 
 COPY loader.py .
+COPY custom_loader.py .
 COPY utils.py .
 COPY chains.py .
 COPY images ./images
