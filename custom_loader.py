@@ -2,11 +2,10 @@ import os
 import requests
 from dotenv import load_dotenv
 from langchain_community.graphs import Neo4jGraph
-import streamlit as st
-from streamlit.logger import get_logger
 from chains import load_embedding_model
 from utils import create_constraints, create_vector_index
 from PIL import Image
+import argparse
 
 load_dotenv(".env")
 
@@ -18,12 +17,11 @@ embedding_model_name = os.getenv("EMBEDDING_MODEL")
 # Remapping for Langchain Neo4j integration
 os.environ["NEO4J_URL"] = url
 
-logger = get_logger(__name__)
 
 so_api_base_url = "https://api.stackexchange.com/2.3/search/advanced"
 
 embeddings, dimension = load_embedding_model(
-    embedding_model_name, config={"ollama_base_url": ollama_base_url}, logger=logger
+    embedding_model_name, config={"ollama_base_url": ollama_base_url}
 )
 
 # if Neo4j is local, you can go to http://localhost:7474/ to browse the database
@@ -95,11 +93,23 @@ def insert_so_data(data: dict) -> None:
     neo4j_graph.query(import_query, {"data": data["items"]})
 
 
-def load_custom_data():
-    num_pages = 1
-    start_page = 1
-    user_input = "github-actions"
-    for page in range(1, num_pages + 1):
-        load_so_data(user_input, start_page + (page - 1))
+def load_custom_data(user_input, num_pages, start_page):
+    for page in range(num_pages):
+        load_so_data(user_input, start_page + page)
 
-load_custom_data()
+if __name__ == "__main__":
+    # Initialize the parser
+    parser = argparse.ArgumentParser(description="Load custom data from a data source.")
+    
+    # Define the positional argument for user input
+    parser.add_argument('user_input', type=str, help='The input keyword to search for.')
+    
+    # Define the optional arguments
+    parser.add_argument('--num_pages', type=int, default=1, help='The number of pages to load. Default is 1.')
+    parser.add_argument('--start_page', type=int, default=1, help='The starting page number. Default is 1.')
+    
+    # Parse the command line arguments
+    args = parser.parse_args()
+    
+    # Call the function with parsed arguments
+    load_custom_data(args.user_input, args.num_pages, args.start_page)
