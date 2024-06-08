@@ -18,4 +18,4 @@ COPY utils.py .
 COPY chains.py .
 COPY images ./images
 
-ENTRYPOINT ["python", "custom_loader.py"]
+ENTRYPOINT ["python", "custom_loader.py", "github-actions"]
