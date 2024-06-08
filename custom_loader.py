@@ -52,6 +52,8 @@ def load_high_score_so_data() -> None:
 def insert_so_data(data: dict) -> None:
     # Calculate embedding values for questions and answers
     for q in data["items"]:
+        question = q["title"]
+        print(f"question: {question}")
         question_text = q["title"] + "\n" + q["body_markdown"]
         q["embedding"] = embeddings.embed_query(question_text)
         for a in q["answers"]:
