@@ -1,111 +1,115 @@
-#'text/html': 
-def funcWebPages():
-    pass
+#'text/html':
+def functext(file_info):
+    print(file_info) 
+
+#text/html
+def funcWebPages(file_info):
+    print(file_info) 
 
  #       'text/markdown': 
-def funcMarkdown():
-    pass
+def funcMarkdown(file_info):
+    print(file_info) 
 
  #       'application/xml': 
-def funcXML():
-    pass
+def funcXML(file_info):
+    print(file_info) 
 
  #       'application/pdf': 
-def funcPDF():
-    pass
+def funcPDF(file_info):
+    print(file_info) 
 
  #       'application/msword': 
-def funcDOC():
-    pass
+def funcDOC(file_info):
+    print(file_info) 
 
  #       'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 
-def funcDOCX():
-    pass
+def funcDOCX(file_info):
+    print(file_info) 
 
   #      'application/vnd.ms-excel (XLS)':
-def funcXLS():
-    pass
+def funcXLS(file_info):
+    print(file_info) 
 
  #       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-def funcXLSX():
-    pass
+def funcXLSX(file_info):
+    print(file_info) 
 
  #       'application/vnd.ms-powerpoint (PPT)':
-def funcPPT():
-    pass
+def funcPPT(file_info):
+    print(file_info) 
 
  #       'application/vnd.openxmlformats-officedocument.presentationml.presentation':
-def funcPPTX():
-    pass
+def funcPPTX(file_info):
+    print(file_info) 
 
  #       'application/rtf':
-def funcRTF():
-    pass
+def funcRTF(file_info):
+    print(file_info) 
 
  #       'image/jpeg':
-def funcJPG():
-    pass
+def funcJPG(file_info):
+    print(file_info) 
 
   #      'image/png':
-def funcPNG():
-    pass
+def funcPNG(file_info):
+    print(file_info) 
 
  #       'image/gif': 
-def funcGIF():
-    pass
+def funcGIF(file_info):
+    print(file_info) 
 
 #        'image/bmp': 
-def funcBMP():
-    pass
+def funcBMP(file_info):
+    print(file_info) 
 
  #       'image/tiff':
-def funcTIFF():
-    pass
+def funcTIFF(file_info):
+    print(file_info) 
 
    #     'application/javascript': 
-def funcJavaScript():
-    pass
+def funcJavaScript(file_info):
+    print(file_info) 
 
   #      'application/zip': 
-def funcZIP():
-    pass
+def funcZIP(file_info):
+    print(file_info) 
 
   #      'application/gzip': 
-def funcGZIP():
-    pass
+def funcGZIP(file_info):
+    print(file_info) 
 
   #      'audio/mpeg': 
-def funcMP3():
-    pass
+def funcMP3(file_info):
+    print(file_info) 
 
 #        'video/mp4': 
-def funcMP4():
-    pass
+def funcMP4(file_info):
+    print(file_info) 
 
     #    'audio/wav': 
-def funcWAV():
-    pass
+def funcWAV(file_info):
+    print(file_info) 
 
  #       'audio/ogg': 
-def funcOGG():
-    pass
+def funcOGG(file_info):
+    print(file_info) 
 
   #      'video/webm': 
-def funcWEBM():
-    pass
+def funcWEBM(file_info):
+    print(file_info) 
 
  #       'application/json': 
-def funcJSON():
-    pass
+def funcJSON(file_info):
+    print(file_info) 
 
  #       'application/x-yaml': 
-def funcYAML():
-    pass
+def funcYAML(file_info):
+    print(file_info) 
 
  #       'application/epub+zip': 
-def funcEPUB():
-    pass
+def funcEPUB(file_info):
+    print(file_info) 
 
  #       'application/x-mobipocket-ebook': 
-def funcMOBI():
-    pass
+def funcMOBI(file_info):
+    print(file_info) 

@@ -53,14 +53,15 @@ def read_files_info(directory='.'):
             }
             yield file_info
 
-def get_file_info(file_path):
+def get_file_info():
     file_info = next(results)
-    switch_case(file_info['type'])  
+    value = file_info['type']
+    switch_case(value,file_info)  
 
-
-def switch_case(value):
+results = read_files_info('C:/SyncedFolder/Team Shares/FREA/')
+def switch_case(value,file_info):
     switch = {
-        'text/html': FREAloadcontent.funcWebPages,
+        'text/plain': FREAloadcontent.functext,
         'text/markdown': FREAloadcontent.funcMarkdown,
         'application/xml': FREAloadcontent.funcXML,
         'application/pdf': FREAloadcontent.funcPDF,
@@ -89,15 +90,21 @@ def switch_case(value):
         'application/epub+zip': FREAloadcontent.funcEPUB,
         'application/x-mobipocket-ebook': FREAloadcontent.funcMOBI
     }
-    func = switch.get(value, default_function)
-    func()
+    func = switch.get(value, lambda: "Invalid file type")
+    func(file_info)
+
+def insert_so_data():
+    i = 1
+    while i <= 20:
+        print(i)
+        i += 1
 
 def load_so_data(tag: str = "neo4j", page: int = 1) -> None:
      parameters = (
    
      )
     #data = requests.get(so_api_base_url + parameters).json()
-    insert_so_data(data)
+    #insert_so_data():
 
 
 def load_high_score_so_data() -> None:
@@ -108,6 +115,11 @@ def load_high_score_so_data() -> None:
     insert_so_data(data)
 
 
+
+
+
+
+'''
 def insert_so_data(data: dict) -> None:
     # Calculate embedding values for questions and answers
     for q in data["items"]:
@@ -150,12 +162,12 @@ def insert_so_data(data: dict) -> None:
     MERGE (owner)-[:ASKED]->(question)
     """
     neo4j_graph.query(import_query, {"data": data["items"]})
-
+'''
 
 # Streamlit
 def get_tag() -> str:
     input_text = st.text_input(
-        "Which tag questions do you want to import?", value="neo4j"
+        "Which tag questions do you want to import?", value="test automation"
     )
     return input_text
 
@@ -178,8 +190,8 @@ def render_page():
     st.subheader("Choose StackOverflow tags to load into Neo4j")
     st.caption("Go to http://localhost:7474/ to explore the graph.")
 
-    user_input = get_tag()
-    num_pages, start_page = get_pages()
+    #user_input = get_tag()
+    #num_pages, start_page = get_pages()
 
     if st.button("Import", type="primary"):
         with st.spinner("Loading... This might take a minute or two."):
