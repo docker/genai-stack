@@ -1,18 +1,27 @@
 import os
 
-from langchain_community.graphs import Neo4jGraph
+import chromadb
+from chromadb.config import DEFAULT_TENANT, DEFAULT_DATABASE, Settings
+from langchain.vectorstores import Chroma
+
 from dotenv import load_dotenv
-from utils import (
-    create_vector_index,
-    BaseLogger,
-)
+from utils import BaseLogger
 from chains import (
     load_embedding_model,
     load_llm,
     configure_llm_only_chain,
-    configure_qa_rag_chain,
-    generate_ticket,
+    RetrievalQAWithSourcesChain
 )
+
+from langchain.chains.qa_with_sources import load_qa_with_sources_chain
+
+from langchain.prompts import (
+    ChatPromptTemplate,
+    HumanMessagePromptTemplate,
+    SystemMessagePromptTemplate
+)
+
+
 from fastapi import FastAPI, Depends
 from pydantic import BaseModel
 from langchain.callbacks.base import BaseCallbackHandler
@@ -25,14 +34,12 @@ import json
 
 load_dotenv(".env")
 
-url = os.getenv("NEO4J_URI")
-username = os.getenv("NEO4J_USERNAME")
-password = os.getenv("NEO4J_PASSWORD")
+chroma_collection = os.getenv("CHROMA_COLLECTION", "release-docs")
+chroma_host = os.getenv("CHROMA_HOST", "localhost") 
+chroma_port = int(os.getenv("CHROMA_PORT", 8000))
 ollama_base_url = os.getenv("OLLAMA_BASE_URL")
 embedding_model_name = os.getenv("EMBEDDING_MODEL")
 llm_name = os.getenv("LLM")
-# Remapping for Langchain Neo4j integration
-os.environ["NEO4J_URL"] = url
 
 embeddings, dimension = load_embedding_model(
     embedding_model_name,
@@ -40,17 +47,65 @@ embeddings, dimension = load_embedding_model(
     logger=BaseLogger(),
 )
 
-# if Neo4j is local, you can go to http://localhost:7474/ to browse the database
-neo4j_graph = Neo4jGraph(url=url, username=username, password=password)
-create_vector_index(neo4j_graph, dimension)
+# Initialize Chroma client
+chroma_client = chromadb.HttpClient(
+    host=chroma_host,
+    port=chroma_port,
+    ssl=False,
+    headers=None,
+    settings=Settings(),
+    tenant=DEFAULT_TENANT,
+    database=DEFAULT_DATABASE,
+)
+
+# create vector database if it doesn't exist
+chroma_client.get_or_create_collection(chroma_collection, metadata={"key": "value"})
 
 llm = load_llm(
     llm_name, logger=BaseLogger(), config={"ollama_base_url": ollama_base_url}
 )
 
 llm_chain = configure_llm_only_chain(llm)
-rag_chain = configure_qa_rag_chain(
-    llm, embeddings, embeddings_store_url=url, username=username, password=password
+
+# PROMPT TEMPLATE
+general_system_template = """
+Use the following pieces of context to answer the question at the end.
+The context contains question-answer pairs and their links from Stackoverflow.
+You should prefer information from accepted or more upvoted answers.
+Make sure to rely on information from the answers and not on questions to provide accurate responses.
+When you find particular answer in the context useful, make sure to cite it in the answer using the link.
+If you don't know the answer, just say that you don't know, don't try to make up an answer.
+----
+{summaries}
+----
+Each answer you generate should contain a section at the end of links to
+Stackoverflow questions and answers you found useful, which are described under Source value.
+You can only use links to StackOverflow questions that are present in the context and always
+add links to the end of the answer in the style of citations.
+Generate concise answers with references sources section of links to
+relevant StackOverflow questions only at the end of the answer.
+"""
+general_user_template = "Question:```{question}```"
+messages = [
+    SystemMessagePromptTemplate.from_template(general_system_template),
+    HumanMessagePromptTemplate.from_template(general_user_template),
+]
+qa_prompt = ChatPromptTemplate.from_messages(messages)
+
+qa_chain = load_qa_with_sources_chain(
+    llm,
+    chain_type="stuff",
+    prompt=qa_prompt,
+)
+
+
+langchainChroma = Chroma(client=chroma_client, collection_name=chroma_collection, embedding_function=embeddings)
+
+rag_chain = RetrievalQAWithSourcesChain(
+    combine_documents_chain=qa_chain,
+    retriever=langchainChroma.as_retriever(search_kwargs={"k": 2}),
+    reduce_k_below_max_tokens=False,
+    max_tokens_limit=3375,
 )
 
 
@@ -151,11 +206,3 @@ async def ask(question: Question = Depends()):
     return {"result": result["answer"], "model": llm_name}
 
 
-@app.get("/generate-ticket")
-async def generate_ticket_api(question: BaseTicket = Depends()):
-    new_title, new_question = generate_ticket(
-        neo4j_graph=neo4j_graph,
-        llm_chain=llm_chain,
-        input_question=question.text,
-    )
-    return {"result": {"title": new_title, "text": new_question}, "model": llm_name}
