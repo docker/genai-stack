@@ -56,42 +56,50 @@ def read_files_info(directory='.'):
 def get_file_info():
     file_info = next(results)
     value = file_info['type']
+    path = file_info['path']
+    name = file_info['name']
     switch_case(value,file_info)  
 
 results = read_files_info('C:/SyncedFolder/Team Shares/FREA/')
+
 def switch_case(value,file_info):
     switch = {
-        'text/plain': FREAloadcontent.functext,
-        'text/markdown': FREAloadcontent.funcMarkdown,
-        'application/xml': FREAloadcontent.funcXML,
-        'application/pdf': FREAloadcontent.funcPDF,
-        'application/msword': FREAloadcontent.funcDOC,
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': FREAloadcontent.funcDOCX,
-        'application/vnd.ms-excel (XLS)': FREAloadcontent.funcXLS,
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': FREAloadcontent.funcXLSX,
-        'application/vnd.ms-powerpoint (PPT)': FREAloadcontent.funcPPT,
-        'application/vnd.openxmlformats-officedocument.presentationml.presentation': FREAloadcontent.funcPPTX,
-        'application/rtf': FREAloadcontent.funcRTF,
-        'image/jpeg': FREAloadcontent.funcJPG,
-        'image/png': FREAloadcontent.funcPNG,
-        'image/gif': FREAloadcontent.funcGIF,
-        'image/bmp': FREAloadcontent.funcBMP,
-        'image/tiff': FREAloadcontent.funcTIFF,
-        'application/javascript': FREAloadcontent.funcJavaScript,
-        'application/zip': FREAloadcontent.funcZIP,
-        'application/gzip': FREAloadcontent.funcGZIP,
-        'audio/mpeg': FREAloadcontent.funcMP3,
-        'video/mp4': FREAloadcontent.funcMP4,
-        'audio/wav': FREAloadcontent.funcWAV,
-        'audio/ogg': FREAloadcontent.funcOGG,
-        'video/webm': FREAloadcontent.funcWEBM,
-        'application/json': FREAloadcontent.funcJSON,
-        'application/x-yaml': FREAloadcontent.funcYAML,
-        'application/epub+zip': FREAloadcontent.funcEPUB,
-        'application/x-mobipocket-ebook': FREAloadcontent.funcMOBI
+        'text/plain': functext,
+        'text/markdown': funcMarkdown,
+        'application/xml':  funcXML,
+        'application/pdf':  funcPDF,
+        'application/msword':  funcDOC,
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document':  funcDOCX,
+        'application/vnd.ms-excel (XLS)':  funcXLS,
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':  funcXLSX,
+        'application/vnd.ms-powerpoint (PPT)':  funcPPT,
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation':  funcPPTX,
+        'application/rtf':  funcRTF,
+        'image/jpeg':  funcJPG,
+        'image/png':  funcPNG,
+        'image/gif':  funcGIF,
+        'image/bmp':  funcBMP,
+        'image/tiff':  funcTIFF,
+        'application/javascript':  funcJavaScript,
+        'application/zip':  funcZIP,
+        'application/gzip':  funcGZIP,
+        'audio/mpeg':  funcMP3,
+        'video/mp4':  funcMP4,
+        'audio/wav':  funcWAV,
+        'audio/ogg':  funcOGG,
+        'video/webm':  funcWEBM,
+        'application/json':  funcJSON,
+        'application/x-yaml':  funcYAML,
+        'application/epub+zip':  funcEPUB,
+        'application/x-mobipocket-ebook':  funcMOBI,
+        'None': funcnone,
     }
-    func = switch.get(value, lambda: "Invalid file type")
-    func(file_info)
+    func = switch.get(value)
+    if func:
+        func(file_info)
+    else:
+        print(f"No function found for file type {value}")
+
 
 def insert_so_data():
     i = 1

@@ -112,4 +112,8 @@ def funcEPUB(file_info):
 
  #       'application/x-mobipocket-ebook': 
 def funcMOBI(file_info):
-    print(file_info) 
+    print(file_info)
+
+def funcnone(file_info):
+    print(file_info)  
+    
