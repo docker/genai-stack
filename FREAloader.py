@@ -8,7 +8,7 @@ from streamlit.logger import get_logger
 from chains import load_embedding_model
 from utils import create_constraints, create_vector_index
 from PIL import Image
-import FREAloadcontent as FREAloadcontent
+import FREAloadcontent as FC
 
 
 load_dotenv(".env")
@@ -64,35 +64,35 @@ results = read_files_info('C:/SyncedFolder/Team Shares/FREA/')
 
 def switch_case(value,file_info):
     switch = {
-        'text/plain': functext,
-        'text/markdown': funcMarkdown,
-        'application/xml':  funcXML,
-        'application/pdf':  funcPDF,
-        'application/msword':  funcDOC,
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document':  funcDOCX,
-        'application/vnd.ms-excel (XLS)':  funcXLS,
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':  funcXLSX,
-        'application/vnd.ms-powerpoint (PPT)':  funcPPT,
-        'application/vnd.openxmlformats-officedocument.presentationml.presentation':  funcPPTX,
-        'application/rtf':  funcRTF,
-        'image/jpeg':  funcJPG,
-        'image/png':  funcPNG,
-        'image/gif':  funcGIF,
-        'image/bmp':  funcBMP,
-        'image/tiff':  funcTIFF,
-        'application/javascript':  funcJavaScript,
-        'application/zip':  funcZIP,
-        'application/gzip':  funcGZIP,
-        'audio/mpeg':  funcMP3,
-        'video/mp4':  funcMP4,
-        'audio/wav':  funcWAV,
-        'audio/ogg':  funcOGG,
-        'video/webm':  funcWEBM,
-        'application/json':  funcJSON,
-        'application/x-yaml':  funcYAML,
-        'application/epub+zip':  funcEPUB,
-        'application/x-mobipocket-ebook':  funcMOBI,
-        'None': funcnone,
+        'text/plain': FC.functext,
+        'text/markdown': FC.funcMarkdown,
+        'application/xml':  FC.funcXML,
+        'application/pdf':  FC.funcPDF,
+        'application/msword':  FC.funcDOC,
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document':  FC.funcDOCX,
+        'application/vnd.ms-excel (XLS)':  FC.funcXLS,
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':  FC.funcXLSX,
+        'application/vnd.ms-powerpoint (PPT)':  FC.funcPPT,
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation':  FC.funcPPTX,
+        'application/rtf':  FC.funcRTF,
+        'image/jpeg':  FC.funcJPG,
+        'image/png':  FC.funcPNG,
+        'image/gif':  FC.funcGIF,
+        'image/bmp':  FC.funcBMP,
+        'image/tiff':  FC.funcTIFF,
+        'application/javascript':  FC.funcJavaScript,
+        'application/zip':  FC.funcZIP,
+        'application/gzip': FC.funcGZIP,
+        'audio/mpeg':  FC.funcMP3,
+        'video/mp4':  FC.funcMP4,
+        'audio/wav':  FC.funcWAV,
+        'audio/ogg':  FC.funcOGG,
+        'video/webm':  FC.funcWEBM,
+        'application/json':  FC.funcJSON,
+        'application/x-yaml':  FC.funcYAML,
+        'application/epub+zip':  FC.funcEPUB,
+        'application/x-mobipocket-ebook':  FC.funcMOBI,
+        'None': FC.funcnone,
     }
     func = switch.get(value)
     if func:
