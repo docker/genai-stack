@@ -14,7 +14,7 @@ Available variables:
 | NEO4J_URI              | neo4j://database:7687              | REQUIRED - URL to Neo4j database                                        |
 | NEO4J_USERNAME         | neo4j                              | REQUIRED - Username for Neo4j database                                  |
 | NEO4J_PASSWORD         | password                           | REQUIRED - Password for Neo4j database                                  |
-| LLM                    | llama2                             | REQUIRED - Can be any Ollama model tag, or gpt-4 or gpt-3.5 or claudev2 |
+| LLM                    | llama3                             | REQUIRED - Can be any Ollama model tag, or gpt-4 or gpt-3.5 or claudev2 |
 | EMBEDDING_MODEL        | sentence_transformer               | REQUIRED - Can be sentence_transformer, openai, aws, ollama or google-genai-embedding-001|
 | AWS_ACCESS_KEY_ID      |                                    | REQUIRED - Only if LLM=claudev2 or embedding_model=aws                  |
 | AWS_SECRET_ACCESS_KEY  |                                    | REQUIRED - Only if LLM=claudev2 or embedding_model=aws                  |
