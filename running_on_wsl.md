@@ -29,10 +29,10 @@ After the activation enter into the WSL with the command `wsl` and type `docker`
     - To list the downloaded model: `ollama list`. This command could lead to:
     ```sh
     NAME            ID              SIZE    MODIFIED       
-    llama2:latest   7da22eda89ac    3.8 GB  22 minutes ago
+    llama3:latest   7da22eda89ac    3.8 GB  22 minutes ago
     ```
-    - (OPTIONAL) To remove model: `ollama rm llama2`
-    - To run the ollama on WSL: `ollama run llama2`
+    - (OPTIONAL) To remove model: `ollama rm llama3`
+    - To run the ollama on WSL: `ollama run llama3`
 
 3. clone the repo
 4. cd into the repo and enter wsl
