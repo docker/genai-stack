@@ -1,7 +1,7 @@
 # GenAI Stack
 The GenAI Stack will get you started building your own GenAI application in no time.
 The demo applications can serve as inspiration or as a starting point.
-Learn more about the details in the [technical blog post](https://neo4j.com/developer-blog/genai-app-how-to-build/).
+Learn more about the details in the [introduction blog post](https://neo4j.com/blog/introducing-genai-stack-developers/).
 
 # Configure
 
