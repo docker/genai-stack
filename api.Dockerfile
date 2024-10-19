@@ -2,7 +2,7 @@ FROM langchain/langchain
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get --allow-unauthenticated install -y \
     build-essential \
     curl \
     software-properties-common \
