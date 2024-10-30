@@ -4,7 +4,7 @@ wikipedia
 tiktoken
 neo4j
 streamlit
-sentence_transformers==2.2.2
+sentence_transformers==2.6.0
 Pillow
 fastapi
 PyPDF2
@@ -14,6 +14,9 @@ uvicorn
 sse-starlette
 boto3
 # missing from the langchain base image?
+ langchain-huggingface==0.0.2
+langchain-core==0.2.1
 langchain-openai
-langchain-community
+langchain-community==0.2.1
 langchain-google-genai
+# Do more of these versions need to be fixed?
