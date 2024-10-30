@@ -72,6 +72,10 @@ styl = f"""
     textarea[aria-label="Description"] {{
         height: 200px;
     }}
+
+    .element-container:has([aria-label="What coding issue can I help you resolve today?"]) {{
+        bottom: 45px;
+    }} 
 </style>
 """
 st.markdown(styl, unsafe_allow_html=True)
