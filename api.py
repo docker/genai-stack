@@ -44,7 +44,7 @@ embeddings, dimension = load_embedding_model(
 neo4j_graph = Neo4jGraph(
     url=url, username=username, password=password, refresh_schema=False
 )
-create_vector_index(neo4j_graph, dimension)
+create_vector_index(neo4j_graph)
 
 llm = load_llm(
     llm_name, logger=BaseLogger(), config={"ollama_base_url": ollama_base_url}

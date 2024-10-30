@@ -32,7 +32,7 @@ neo4j_graph = Neo4jGraph(
 )
 
 create_constraints(neo4j_graph)
-create_vector_index(neo4j_graph, dimension)
+create_vector_index(neo4j_graph)
 
 
 def load_so_data(tag: str = "neo4j", page: int = 1) -> None:

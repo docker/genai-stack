@@ -36,7 +36,7 @@ neo4j_graph = Neo4jGraph(
 embeddings, dimension = load_embedding_model(
     embedding_model_name, config={"ollama_base_url": ollama_base_url}, logger=logger
 )
-create_vector_index(neo4j_graph, dimension)
+create_vector_index(neo4j_graph)
 
 
 class StreamHandler(BaseCallbackHandler):
