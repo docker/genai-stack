@@ -27,10 +27,12 @@ embeddings, dimension = load_embedding_model(
 )
 
 # if Neo4j is local, you can go to http://localhost:7474/ to browse the database
-neo4j_graph = Neo4jGraph(url=url, username=username, password=password)
+neo4j_graph = Neo4jGraph(
+    url=url, username=username, password=password, refresh_schema=False
+)
 
 create_constraints(neo4j_graph)
-create_vector_index(neo4j_graph, dimension)
+create_vector_index(neo4j_graph)
 
 
 def load_so_data(tag: str = "neo4j", page: int = 1) -> None:
