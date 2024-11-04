@@ -1,14 +1,12 @@
 
 from langchain_openai import OpenAIEmbeddings
-from langchain_community.embeddings import OllamaEmbeddings
-from langchain_community.embeddings import BedrockEmbeddings
-from langchain_community.embeddings.sentence_transformer import SentenceTransformerEmbeddings
+from langchain_ollama import OllamaEmbeddings
+from langchain_aws import BedrockEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 
 from langchain_openai import ChatOpenAI
-from langchain_community.chat_models import ChatOllama
-from langchain_community.chat_models import BedrockChat
-
-from langchain_community.graphs import Neo4jGraph
+from langchain_ollama import ChatOllama
+from langchain_aws import ChatBedrock
 
 from langchain_community.vectorstores import Neo4jVector
 
@@ -48,7 +46,7 @@ def load_embedding_model(embedding_model_name: str, logger=BaseLogger(), config=
         dimension = 768
         logger.info("Embedding: Using Google Generative AI Embeddings")
     else:
-        embeddings = SentenceTransformerEmbeddings(
+        embeddings = HuggingFaceEmbeddings(
             model_name="all-MiniLM-L6-v2", cache_folder="/embedding_model"
         )
         dimension = 384
@@ -65,7 +63,7 @@ def load_llm(llm_name: str, logger=BaseLogger(), config={}):
         return ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo", streaming=True)
     elif llm_name == "claudev2":
         logger.info("LLM: ClaudeV2")
-        return BedrockChat(
+        return ChatBedrock(
             model_id="anthropic.claude-v2",
             model_kwargs={"temperature": 0.0, "max_tokens_to_sample": 1024},
             streaming=True,
