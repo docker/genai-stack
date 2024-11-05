@@ -15,7 +15,15 @@ COPY <<EOF pull_model.clj
   (let [llm (get (System/getenv) "LLM")
         url (get (System/getenv) "OLLAMA_BASE_URL")]
     (println (format "pulling ollama model %s using %s" llm url))
-    (if (and llm url (not (#{"gpt-4" "gpt-3.5" "claudev2"} llm)))
+    (if (and llm 
+         url 
+         (not (#{"gpt-4" "gpt-3.5" "claudev2" "gpt-4o" "gpt-4-turbo"} llm))
+         (not (some #(.startsWith llm %) ["ai21.jamba-instruct-v1:0"
+                                          "amazon.titan"
+                                          "anthropic.claude"
+                                          "cohere.command"
+                                          "meta.llama"
+                                          "mistral.mi"])))
 
       ;; ----------------------------------------------------------------------
       ;; just call `ollama pull` here - create OLLAMA_HOST from OLLAMA_BASE_URL
