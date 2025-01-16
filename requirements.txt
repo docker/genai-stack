@@ -17,3 +17,4 @@ boto3
 langchain-openai
 langchain-community
 langchain-google-genai
+transformers>=4.48.0 # not directly required, pinned by Snyk to avoid a vulnerability
