@@ -1,14 +1,12 @@
 
 from langchain_openai import OpenAIEmbeddings
-from langchain_community.embeddings import OllamaEmbeddings
-from langchain_community.embeddings import BedrockEmbeddings
-from langchain_community.embeddings.sentence_transformer import SentenceTransformerEmbeddings
+from langchain_ollama import OllamaEmbeddings
+from langchain_aws import BedrockEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 
 from langchain_openai import ChatOpenAI
-from langchain_community.chat_models import ChatOllama
-from langchain_community.chat_models import BedrockChat
-
-from langchain_community.graphs import Neo4jGraph
+from langchain_ollama import ChatOllama
+from langchain_aws import ChatBedrock
 
 from langchain_community.vectorstores import Neo4jVector
 
@@ -25,6 +23,14 @@ from typing import List, Any
 from utils import BaseLogger, extract_title_and_question
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
+AWS_MODELS = (
+    "ai21.jamba-instruct-v1:0",
+    "amazon.titan",
+    "anthropic.claude",
+    "cohere.command",
+    "meta.llama",
+    "mistral.mi",
+)
 
 def load_embedding_model(embedding_model_name: str, logger=BaseLogger(), config={}):
     if embedding_model_name == "ollama":
@@ -48,7 +54,7 @@ def load_embedding_model(embedding_model_name: str, logger=BaseLogger(), config=
         dimension = 768
         logger.info("Embedding: Using Google Generative AI Embeddings")
     else:
-        embeddings = SentenceTransformerEmbeddings(
+        embeddings = HuggingFaceEmbeddings(
             model_name="all-MiniLM-L6-v2", cache_folder="/embedding_model"
         )
         dimension = 384
@@ -57,19 +63,27 @@ def load_embedding_model(embedding_model_name: str, logger=BaseLogger(), config=
 
 
 def load_llm(llm_name: str, logger=BaseLogger(), config={}):
-    if llm_name == "gpt-4":
+    if llm_name in ["gpt-4", "gpt-4o", "gpt-4-turbo"]:
         logger.info("LLM: Using GPT-4")
-        return ChatOpenAI(temperature=0, model_name="gpt-4", streaming=True)
+        return ChatOpenAI(temperature=0, model_name=llm_name, streaming=True)
     elif llm_name == "gpt-3.5":
         logger.info("LLM: Using GPT-3.5")
         return ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo", streaming=True)
     elif llm_name == "claudev2":
         logger.info("LLM: ClaudeV2")
-        return BedrockChat(
+        return ChatBedrock(
             model_id="anthropic.claude-v2",
             model_kwargs={"temperature": 0.0, "max_tokens_to_sample": 1024},
             streaming=True,
         )
+    elif llm_name.startswith(AWS_MODELS):
+        logger.info(f"LLM: {llm_name}")
+        return ChatBedrock(
+            model_id=llm_name,
+            model_kwargs={"temperature": 0.0, "max_tokens_to_sample": 1024},
+            streaming=True,
+        )
+
     elif len(llm_name):
         logger.info(f"LLM: Using Ollama: {llm_name}")
         return ChatOllama(
