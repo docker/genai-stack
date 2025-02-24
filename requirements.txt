@@ -20,4 +20,5 @@ langchain-google-genai
 # Addtion needed packages
 os
 mintypes
+PyTorch==2.2.0
 

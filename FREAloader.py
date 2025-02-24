@@ -9,6 +9,7 @@ from chains import load_embedding_model
 from utils import create_constraints, create_vector_index
 from PIL import Image
 import FREAloadcontent as FC
+from pdfreader import SimplePDFViewer
 
 
 load_dotenv(".env")
