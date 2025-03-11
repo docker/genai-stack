@@ -8,7 +8,7 @@ from langchain_openai import ChatOpenAI
 from langchain_ollama import ChatOllama
 from langchain_aws import ChatBedrock
 
-from langchain_community.vectorstores import Neo4jVector
+from langchain_neo4j import Neo4jVector
 
 from langchain.chains import RetrievalQAWithSourcesChain
 from langchain.chains.qa_with_sources import load_qa_with_sources_chain
