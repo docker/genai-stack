@@ -1,4 +1,3 @@
-
 from langchain_openai import OpenAIEmbeddings
 from langchain_ollama import OllamaEmbeddings
 from langchain_aws import BedrockEmbeddings
@@ -16,7 +15,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain.prompts import (
     ChatPromptTemplate,
     HumanMessagePromptTemplate,
-    SystemMessagePromptTemplate
+    SystemMessagePromptTemplate,
 )
 
 from typing import List, Any
@@ -31,6 +30,7 @@ AWS_MODELS = (
     "meta.llama",
     "mistral.mi",
 )
+
 
 def load_embedding_model(embedding_model_name: str, logger=BaseLogger(), config={}):
     if embedding_model_name == "ollama":
@@ -47,10 +47,8 @@ def load_embedding_model(embedding_model_name: str, logger=BaseLogger(), config=
         embeddings = BedrockEmbeddings()
         dimension = 1536
         logger.info("Embedding: Using AWS")
-    elif embedding_model_name == "google-genai-embedding-001":        
-        embeddings = GoogleGenerativeAIEmbeddings(
-            model="models/embedding-001"
-        )
+    elif embedding_model_name == "google-genai-embedding-001":
+        embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
         dimension = 768
         logger.info("Embedding: Using Google Generative AI Embeddings")
     else:
@@ -113,7 +111,8 @@ def configure_llm_only_chain(llm):
         [system_message_prompt, human_message_prompt]
     )
     chain = chat_prompt | llm | StrOutputParser()
-    return chain 
+    return chain
+
 
 def configure_qa_rag_chain(llm, embeddings, embeddings_store_url, username, password):
     # RAG response
@@ -169,7 +168,10 @@ def configure_qa_rag_chain(llm, embeddings, embeddings_store_url, username, pass
     )
     kg_qa = (
         RunnableParallel(
-            {"summaries": kg.as_retriever(search_kwargs={"k": 2}) | format_docs, "question": RunnablePassthrough()}
+            {
+                "summaries": kg.as_retriever(search_kwargs={"k": 2}) | format_docs,
+                "question": RunnablePassthrough(),
+            }
         )
         | qa_prompt
         | llm

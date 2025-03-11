@@ -128,7 +128,7 @@ def qstream(question: Question = Depends()):
     q = Queue()
 
     def cb():
-        output_function.invoke(question.text, config={'callbacks':[QueueCallback(q)]})
+        output_function.invoke(question.text, config={"callbacks": [QueueCallback(q)]})
 
     def generate():
         yield json.dumps({"init": True, "model": llm_name})

@@ -92,8 +92,10 @@ def chat_input():
         with st.chat_message("assistant"):
             st.caption(f"RAG: {name}")
             stream_handler = StreamHandler(st.empty())
-            output = output_function.invoke(user_input, config={'callbacks': [stream_handler]})
-  
+            output = output_function.invoke(
+                user_input, config={"callbacks": [stream_handler]}
+            )
+
             st.session_state[f"user_input"].append(user_input)
             st.session_state[f"generated"].append(output)
             st.session_state[f"rag_mode"].append(name)

@@ -14,6 +14,7 @@ from chains import (
 from langchain_core.runnables import RunnableParallel, RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from utils import format_docs
+
 # load api key lib
 from dotenv import load_dotenv
 
@@ -69,9 +70,14 @@ def main():
         )
 
         chunks = text_splitter.split_text(text=text)
-        qa_prompt = ChatPromptTemplate.from_messages([
-        ("human", "Based on the provided summary: {summaries} \n Answer the following question:{question}")
-        ])
+        qa_prompt = ChatPromptTemplate.from_messages(
+            [
+                (
+                    "human",
+                    "Based on the provided summary: {summaries} \n Answer the following question:{question}",
+                )
+            ]
+        )
 
         # Store the chunks part in db (vector)
         vectorstore = Neo4jVector.from_texts(
@@ -86,7 +92,11 @@ def main():
         )
         qa = (
             RunnableParallel(
-                {"summaries": vectorstore.as_retriever(search_kwargs={"k": 2}) | format_docs, "question": RunnablePassthrough()}
+                {
+                    "summaries": vectorstore.as_retriever(search_kwargs={"k": 2})
+                    | format_docs,
+                    "question": RunnablePassthrough(),
+                }
             )
             | qa_prompt
             | llm
@@ -98,7 +108,7 @@ def main():
 
         if query:
             stream_handler = StreamHandler(st.empty())
-            qa.invoke(query, {'callbacks':[stream_handler]})
+            qa.invoke(query, {"callbacks": [stream_handler]})
 
 
 if __name__ == "__main__":
