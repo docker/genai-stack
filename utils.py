@@ -52,3 +52,6 @@ def create_constraints(driver):
     driver.query(
         "CREATE CONSTRAINT tag_name IF NOT EXISTS FOR (t:Tag) REQUIRE (t.name) IS UNIQUE"
     )
+
+def format_docs(docs):
+    return "\n\n".join(doc.page_content for doc in docs)
