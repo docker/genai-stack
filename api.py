@@ -128,10 +128,7 @@ def qstream(question: Question = Depends()):
     q = Queue()
 
     def cb():
-        output_function(
-            {"question": question.text, "chat_history": []},
-            callbacks=[QueueCallback(q)],
-        )
+        output_function.invoke(question.text, config={"callbacks": [QueueCallback(q)]})
 
     def generate():
         yield json.dumps({"init": True, "model": llm_name})
@@ -146,9 +143,7 @@ async def ask(question: Question = Depends()):
     output_function = llm_chain
     if question.rag:
         output_function = rag_chain
-    result = output_function(
-        {"question": question.text, "chat_history": []}, callbacks=[]
-    )
+    result = output_function.invoke(question.text)
 
     return {"result": result["answer"], "model": llm_name}
 

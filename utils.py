@@ -32,7 +32,9 @@ def create_vector_index(driver) -> None:
         driver.query(index_query)
     except:  # Already exists
         pass
-    index_query = "CREATE VECTOR INDEX top_answers IF NOT EXISTS FOR (m:Answer) ON m.embedding"
+    index_query = (
+        "CREATE VECTOR INDEX top_answers IF NOT EXISTS FOR (m:Answer) ON m.embedding"
+    )
     try:
         driver.query(index_query)
     except:  # Already exists
@@ -52,3 +54,7 @@ def create_constraints(driver):
     driver.query(
         "CREATE CONSTRAINT tag_name IF NOT EXISTS FOR (t:Tag) REQUIRE (t.name) IS UNIQUE"
     )
+
+
+def format_docs(docs):
+    return "\n\n".join(doc.page_content for doc in docs)
