@@ -3,7 +3,7 @@ import os
 import streamlit as st
 from streamlit.logger import get_logger
 from langchain.callbacks.base import BaseCallbackHandler
-from langchain_community.graphs import Neo4jGraph
+from langchain_neo4j import Neo4jGraph
 from dotenv import load_dotenv
 from utils import (
     create_vector_index,
@@ -92,10 +92,10 @@ def chat_input():
         with st.chat_message("assistant"):
             st.caption(f"RAG: {name}")
             stream_handler = StreamHandler(st.empty())
-            result = output_function(
-                {"question": user_input, "chat_history": []}, callbacks=[stream_handler]
-            )["answer"]
-            output = result
+            output = output_function.invoke(
+                user_input, config={"callbacks": [stream_handler]}
+            )
+
             st.session_state[f"user_input"].append(user_input)
             st.session_state[f"generated"].append(output)
             st.session_state[f"rag_mode"].append(name)
