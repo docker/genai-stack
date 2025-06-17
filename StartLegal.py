@@ -2,7 +2,7 @@ import streamlit as st
 from streamlit.logger import get_logger
 
 
-st.set_page_config(page_title="StartLegal - IA para Cartórios", page_icon="📄")
+st.set_page_config(page_title="StartLegal - IA para Cartórios", page_icon="🤖", layout="wide")
 
 logger = get_logger(__name__)
 
