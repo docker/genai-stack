@@ -4,6 +4,7 @@ import logging
 from utils import StreamHandler
 from rag_utils.config import init
 from rag_utils.pipeline import RAG_document_retrieval, RAG_document_validator
+import base64
 
 
 logging.basicConfig(level = logging.INFO)
@@ -40,40 +41,61 @@ for tab, document in zip(tabs, st.session_state.owner_documents_list):
         if uploaded_file:
             st.write("A IA irá coletar e validar as informações presentes...")
 
-            answer = RAG_document_retrieval(
-                        document=document,
-                        file=uploaded_file,
-                        prompts=st.session_state.prompts,
-                        logger=logger,
-                        embeddings=st.session_state.embeddings,
-                        vectordb_config=st.session_state.vectorstore_config,
-                        llm=st.session_state.llm
-                    )
-            # Print output answer
-            stream_handler = StreamHandler(st.empty())
-            for token in answer:
-                stream_handler.on_llm_new_token(token=token)
+            col1, col2, col3 = st.columns(3, vertical_alignment="top")
 
-            # Ask to LLM a table showing the Document data and Minuta data
-            st.write(f"Validando dados de {document} com os dados da Minuta.")
+            with col1:
+                base64_pdf = base64.b64encode(uploaded_file.getvalue()).decode("utf-8")
+                pdf_display = (
+                    f'<embed src="data:application/pdf;base64,{base64_pdf}" '
+                    'width="640" height="1080" type="application/pdf"></embed>'
+                )
+                
+                st.markdown(pdf_display, unsafe_allow_html=True)
+            
+            with col3:
+                base64_pdf = base64.b64encode(st.session_state.minuta_file.getvalue()).decode("utf-8")
+                pdf_display = (
+                    f'<embed src="data:application/pdf;base64,{base64_pdf}" '
+                    'width="640" height="1080" type="application/pdf"></embed>'
+                )
+                
+                st.markdown(pdf_display, unsafe_allow_html=True)
 
-            minuta_answer = st.session_state.minuta_vendedor 
-            if document == 'Matrícula do Imóvel':
-                minuta_answer = st.session_state.minuta_imovel
-            
-            final_answer = RAG_document_validator(
-                document=document,
-                document_answer=answer,
-                minuta_answer=minuta_answer,
-                llm=st.session_state.llm,
-                logger=logger
-            )
-            st.session_state.final_answer_owner[document] = final_answer
-            
-            # Print output answer
-            stream_handler = StreamHandler(st.empty())
-            for token in final_answer:
-                stream_handler.on_llm_new_token(token=token)
+            with col2:
+                answer = RAG_document_retrieval(
+                            document=document,
+                            file=uploaded_file,
+                            prompts=st.session_state.prompts,
+                            logger=logger,
+                            embeddings=st.session_state.embeddings,
+                            vectordb_config=st.session_state.vectorstore_config,
+                            llm=st.session_state.llm
+                        )
+                # Print output answer
+                stream_handler = StreamHandler(st.empty())
+                for token in answer:
+                    stream_handler.on_llm_new_token(token=token)
+
+                # Ask to LLM a table showing the Document data and Minuta data
+                st.write(f"Validando dados de {document} com os dados da Minuta.")
+
+                minuta_answer = st.session_state.minuta_vendedor 
+                if document == 'Matrícula do Imóvel':
+                    minuta_answer = st.session_state.minuta_imovel
+                
+                final_answer = RAG_document_validator(
+                    document=document,
+                    document_answer=answer,
+                    minuta_answer=minuta_answer,
+                    llm=st.session_state.llm,
+                    logger=logger
+                )
+                st.session_state.final_answer_owner[document] = final_answer
+                
+                # Print output answer
+                stream_handler = StreamHandler(st.empty())
+                for token in final_answer:
+                    stream_handler.on_llm_new_token(token=token)
             
         else:
             if st.session_state.final_answer_owner[document]:
