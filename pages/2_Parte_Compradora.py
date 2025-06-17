@@ -52,7 +52,7 @@ for tab, document in zip(tabs, st.session_state.buyer_documents_list):
         if uploaded_file:
             st.write("A IA irá coletar e validar as informações presentes...")
 
-            col1, col2, col3 = st.columns(3, vertical_alignment="center")
+            col1, col2, col3 = st.columns(3, vertical_alignment="top")
 
             with col1:
                 base64_pdf = base64.b64encode(uploaded_file.getvalue()).decode("utf-8")
