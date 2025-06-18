@@ -22,6 +22,8 @@ ADD rag_utils rag_utils
 ADD pages pages
 COPY __init__.py .
 COPY StartLegal.py .
+COPY Revisor_de_Minuta.py .
+COPY Escrita_de_Minuta.py .
 COPY prompts.json .
 COPY utils.py .
 COPY chains.py .

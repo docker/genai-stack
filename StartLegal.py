@@ -2,32 +2,21 @@ import streamlit as st
 from streamlit.logger import get_logger
 
 
+st.set_page_config(page_title="StartLegal - IA para Cartórios", page_icon="🤖", layout="wide")
+
 logger = get_logger(__name__)
 
-st.set_page_config(page_title="StartLegal", page_icon="📄")
+escritor_page = st.Page("Escrita_de_Minuta.py", title="Escrita de Minuta", icon="✍️")
 
-st.title(body='📄 StartLegal')
-st.header("Módulo Revisor de Escrituras", divider='gray', )
+revisor_page = st.Page("Revisor_de_Minuta.py", title="Guia de Usabilidade", icon="📄")
+upload_minuta_page = st.Page("pages/1_Anexar_Minuta.py", title="Minuta", icon="📄")
+parte_compradora_page = st.Page("pages/2_Parte_Compradora.py", title="Parte Compradora", icon="📄")
+parte_vendedora_page = st.Page("pages/3_Parte_Vendedora.py", title="Parte Vendedora", icon="📄")
 
-st.write(
-    "Anexe a minuta de uma escritura e em seguida os documentos necessários para revisão."
+pg = st.navigation(
+    {
+        "Escrita de Minutas": [escritor_page],
+        "Revisão de Minutas": [revisor_page, upload_minuta_page, parte_compradora_page, parte_vendedora_page],
+    }
 )
-
-doc_ = '''Siga os passos abaixo para revisar informações da Minuta:
-1. No menu à esquerda, clique em "Anexar Minuta" para inserir uma minuta no sistema e iniciar o processo de revisão.
-2. Em seguida clique em "Parte Compradora" e insira no sistema os documentos necessários em cada aba disponível (se necessário).
-    
-    2.1. Aguarde o sistema extrair as informações e realizar a comparação com a Minuta fornecida.
-
-    2.2. Caso encontre alguma inconsistência, reportar o escrivão e finalizar o processo de revisão.
-
-3. Por último, clique em "Parte Vendedora" e insira os documentos solicitados.
-
-    3.1. Aguarde o sistema extrair as informações e realizar a comparação com a Minuta fornecida.
-
-    3.2 Caso encontre alguma inconsistência, reportar o escrivão e finalizar o processo de revisão.
-'''
-
-st.markdown(
-    doc_
-)
+pg.run()

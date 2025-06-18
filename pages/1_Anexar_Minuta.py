@@ -15,10 +15,6 @@ if 'init' not in st.session_state:
     st.session_state.init = True
     init()
     
-st.set_page_config(page_title="StartLegal - Anexar a Minuta", layout="wide")
-
-
-
 st.subheader(
     "Anexe a minuta da escritura para iniciar a revisão.",
     divider='gray'
