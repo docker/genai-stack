@@ -6,23 +6,26 @@ import threading
 import logging
 import time
 
+
 session_state_status_percent = 0
 
 
 def parte_compradora_agents_thread(uploaded_files):
+    global session_state_status_percent
+
     if uploaded_files:
         st.session_state.status = "Processando documentos da parte compradora..."
-        global session_state_status_percent
+        logging.info("Parte compradora: Iniciando o processamento dos documentos.")
+        
         session_state_status_percent = 0
         len_uploaded_files = len(uploaded_files)
-        logging.info("Parte compradora: Iniciando o processamento dos documentos.")
         
         # Simulate processing each uploaded file
         for p, uploaded_file in enumerate(uploaded_files):
             # Simulate processing time
             time.sleep(1)
             st.session_state.status = f"Processando {uploaded_file.name}..."
-            session_state_status_percent = (session_state_status_percent+p+1) / len_uploaded_files
+            session_state_status_percent = (p+1) / len_uploaded_files
             logging.info(f"Parte compradora: Processando {uploaded_file.name}...")
             logging.info(f"Parte compradora (Thread): Progresso {session_state_status_percent:.2%}")
 
@@ -51,6 +54,8 @@ def parte_compradora_button_callback(uploaded_files, container):
             logging.info(f"Parte compradora: Progresso {session_state_status_percent:.2%}")
         bar.empty()
         thread.join()
+
+    session_state_status_percent = 0
     st.session_state.status = "Processamento finalizado!"
     logging.info("Parte compradora: Processamento finalizado!")
 
