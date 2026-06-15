@@ -3,3 +3,5 @@ data/
 embedding_model/*
 !embedding_model/.ignore
 .DS_Store
+.conda
+.gitignore

@@ -1,0 +1,80 @@
+import torch
+from ultralytics import YOLO
+import cv2
+import matplotlib.pyplot as plt
+import numpy as np
+
+
+
+
+def segment_image(image_path, model_weights, output_path=None):
+   
+    # Load the YOLOv8 model with the specified weights
+    model = YOLO(model_weights)
+    
+    # Read the image
+    image = cv2.imread(image_path)
+    image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    
+    # Perform segmentation
+    results = model(image_rgb)
+    
+    # Extract the segmented mask
+    segmented_image = results[0].masks.data[0].numpy()
+    
+    # Convert the mask to a binary mask
+    segmented_image = (segmented_image > 0.5).astype('uint8') * 255
+    
+    # Save the segmented image if output path is specified
+    if output_path:
+        cv2.imwrite(output_path, segmented_image)
+    
+    # Return the segmented image
+    return segmented_image
+
+
+def image_to_numpy_opencv(image_path):
+   
+    image_array = cv2.imread(image_path)
+    return image_array
+
+def load_mask(mask_path):
+   
+    mask_image = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
+    _, mask_array = cv2.threshold(mask_image, 127, 1, cv2.THRESH_BINARY)
+    return mask_array
+
+
+def extract_masked_pixels(image, mask):
+   
+    # Ensure the mask is binary
+    mask = mask.astype(np.uint8)
+    
+    # Create an empty image with the same dimensions as the original
+    masked_image = np.zeros_like(image)
+
+    # Copy the pixels from the original image to the masked image where the mask is 1
+    masked_image[mask == 1] = image[mask == 1]
+
+    return masked_image
+
+
+
+
+# Example usage
+original_image = './images/me.jpg'
+model_weights = './functions/YoLo/weights/person_yolov8m-seg.pt'  # Path to open-source YOLOv8 weights
+binary_mask = './images/output_segmented.jpg'
+
+segmented_image = segment_image(original_image, model_weights, binary_mask)
+
+original_imageNP = image_to_numpy_opencv(original_image)
+binary_mask = load_mask(binary_mask)  # Ensure the mask is loaded correctly
+
+result = extract_masked_pixels(original_image, binary_mask)
+cv2.imwrite('masked_image.png', result)
+
+
+
+
+
