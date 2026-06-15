@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat Interface</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 h-screen">
+    <div class="container mx-auto p-4 h-full flex flex-col">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-md p-4 mb-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-gray-800">AI Chat Interface</h1>
+            <button id="settingsBtn" class="text-gray-600 hover:text-gray-800">
+                <i class="fas fa-cog text-xl"></i>
+            </button>
+        </div>
+
+        <!-- Settings Panel -->
+        <div id="settingsPanel" class="bg-white rounded-lg shadow-md p-4 mb-4 hidden">
+            <h2 class="text-xl font-semibold mb-4">Settings</h2>
+            
+            <!-- Provider Selection -->
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">AI Provider</label>
+                <select id="providerSelect" class="w-full p-2 border rounded-lg">
+                    <option value="">Select Provider</option>
+                </select>
+            </div>
+
+            <!-- Model Selection -->
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Model</label>
+                <select id="modelSelect" class="w-full p-2 border rounded-lg" disabled>
+                    <option value="">Select Model</option>
+                </select>
+            </div>
+
+            <!-- API Key Input -->
+            <div id="apiKeySection" class="mb-4 hidden">
+                <label class="block text-gray-700 text-sm font-bold mb-2">API Key</label>
+                <input type="password" id="apiKey" class="w-full p-2 border rounded-lg" placeholder="Enter API Key">
+            </div>
+
+            <!-- Model Settings -->
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Temperature</label>
+                <input type="range" id="temperature" min="0" max="1" step="0.1" value="0.7" class="w-full">
+                <span id="temperatureValue" class="text-sm text-gray-600">0.7</span>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Max Tokens</label>
+                <input type="number" id="maxTokens" min="100" max="4000" value="2000" class="w-full p-2 border rounded-lg">
+            </div>
+
+            <button id="saveSettings" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                Save Settings
+            </button>
+        </div>
+
+        <!-- Chat Container -->
+        <div class="flex-1 bg-white rounded-lg shadow-md p-4 flex flex-col">
+            <div id="chatMessages" class="flex-1 overflow-y-auto mb-4 space-y-4">
+                <!-- Messages will be added here -->
+            </div>
+
+            <!-- Input Area -->
+            <div class="border-t pt-4">
+                <div class="flex space-x-2">
+                    <input type="text" id="messageInput" 
+                           class="flex-1 p-2 border rounded-lg focus:outline-none focus:border-blue-500"
+                           placeholder="Type your message...">
+                    <button id="sendButton" 
+                            class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const settingsBtn = document.getElementById('settingsBtn');
+        const settingsPanel = document.getElementById('settingsPanel');
+        const providerSelect = document.getElementById('providerSelect');
+        const modelSelect = document.getElementById('modelSelect');
+        const apiKeySection = document.getElementById('apiKeySection');
+        const apiKeyInput = document.getElementById('apiKey');
+        const temperatureInput = document.getElementById('temperature');
+        const temperatureValue = document.getElementById('temperatureValue');
+        const maxTokensInput = document.getElementById('maxTokens');
+        const saveSettingsBtn = document.getElementById('saveSettings');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const chatMessages = document.getElementById('chatMessages');
+
+        // State
+        let currentProvider = '';
+        let currentModel = '';
+        let availableModels = [];
+
+        // Toggle Settings Panel
+        settingsBtn.addEventListener('click', () => {
+            settingsPanel.classList.toggle('hidden');
+        });
+
+        // Load Available Models
+        async function loadModels() {
+            try {
+                const response = await fetch('/api/models');
+                availableModels = await response.json();
+                
+                // Populate provider select
+                providerSelect.innerHTML = '<option value="">Select Provider</option>';
+                availableModels.forEach(provider => {
+                    const option = document.createElement('option');
+                    option.value = provider.provider;
+                    option.textContent = provider.name;
+                    providerSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading models:', error);
+            }
+        }
+
+        // Handle Provider Selection
+        providerSelect.addEventListener('change', (e) => {
+            const provider = e.target.value;
+            currentProvider = provider;
+            
+            // Reset model select
+            modelSelect.innerHTML = '<option value="">Select Model</option>';
+            modelSelect.disabled = true;
+            
+            if (provider) {
+                const providerConfig = availableModels.find(p => p.provider === provider);
+                if (providerConfig) {
+                    // Populate model select
+                    providerConfig.models.forEach(model => {
+                        const option = document.createElement('option');
+                        option.value = model;
+                        option.textContent = model;
+                        modelSelect.appendChild(option);
+                    });
+                    modelSelect.disabled = false;
+                    
+                    // Show/hide API key section
+                    apiKeySection.classList.toggle('hidden', provider === 'ollama');
+                }
+            }
+        });
+
+        // Handle Model Selection
+        modelSelect.addEventListener('change', (e) => {
+            currentModel = e.target.value;
+        });
+
+        // Update Temperature Value Display
+        temperatureInput.addEventListener('input', (e) => {
+            temperatureValue.textContent = e.target.value;
+        });
+
+        // Save Settings
+        saveSettingsBtn.addEventListener('click', () => {
+            const settings = {
+                provider: currentProvider,
+                model: currentModel,
+                apiKey: apiKeyInput.value,
+                temperature: parseFloat(temperatureInput.value),
+                maxTokens: parseInt(maxTokensInput.value)
+            };
+            
+            localStorage.setItem('chatSettings', JSON.stringify(settings));
+            settingsPanel.classList.add('hidden');
+            
+            // Add system message
+            addMessage('System', 'Settings saved successfully!', 'system');
+        });
+
+        // Add Message to Chat
+        function addMessage(role, content, type = 'user') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `flex ${type === 'user' ? 'justify-end' : 'justify-start'}`;
+            
+            const messageBubble = document.createElement('div');
+            messageBubble.className = `max-w-[70%] p-3 rounded-lg ${
+                type === 'user' ? 'bg-blue-500 text-white' : 
+                type === 'system' ? 'bg-gray-200 text-gray-800' :
+                'bg-gray-100 text-gray-800'
+            }`;
+            
+            const roleSpan = document.createElement('div');
+            roleSpan.className = 'text-xs font-semibold mb-1';
+            roleSpan.textContent = role;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.textContent = content;
+            
+            messageBubble.appendChild(roleSpan);
+            messageBubble.appendChild(contentDiv);
+            messageDiv.appendChild(messageBubble);
+            chatMessages.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Send Message
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            // Get settings
+            const settings = JSON.parse(localStorage.getItem('chatSettings') || '{}');
+            if (!settings.provider || !settings.model) {
+                addMessage('System', 'Please configure your settings first!', 'system');
+                return;
+            }
+
+            // Add user message
+            addMessage('You', message, 'user');
+            messageInput.value = '';
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message,
+                        provider: settings.provider,
+                        model: settings.model,
+                        temperature: settings.temperature,
+                        max_tokens: settings.maxTokens
+                    })
+                });
+
+                const data = await response.json();
+                if (data.error) {
+                    addMessage('System', `Error: ${data.error}`, 'system');
+                } else {
+                    addMessage('AI', data.response, 'assistant');
+                }
+            } catch (error) {
+                addMessage('System', `Error: ${error.message}`, 'system');
+            }
+        }
+
+        // Event Listeners
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Load saved settings
+        const savedSettings = JSON.parse(localStorage.getItem('chatSettings') || '{}');
+        if (savedSettings.provider) {
+            providerSelect.value = savedSettings.provider;
+            providerSelect.dispatchEvent(new Event('change'));
+            if (savedSettings.model) {
+                modelSelect.value = savedSettings.model;
+            }
+            temperatureInput.value = savedSettings.temperature || 0.7;
+            temperatureValue.textContent = temperatureInput.value;
+            maxTokensInput.value = savedSettings.maxTokens || 2000;
+            apiKeyInput.value = savedSettings.apiKey || '';
+        }
+
+        // Initial load
+        loadModels();
+    </script>
+</body>
+</html> 

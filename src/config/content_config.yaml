@@ -1,0 +1,83 @@
+# Content Generation Configuration
+
+# Platform-specific settings
+platforms:
+  tiktok:
+    max_duration: 60  # seconds
+    aspect_ratio: "9:16"
+    target_audience: "Gen Z and Millennials"
+    style: "fast-paced, engaging, educational"
+    
+  youtube_shorts:
+    max_duration: 60  # seconds
+    aspect_ratio: "9:16"
+    target_audience: "All ages"
+    style: "educational, entertaining"
+    
+  instagram:
+    max_duration: 60  # seconds
+    aspect_ratio: "1:1"
+    target_audience: "Millennials and Gen Z"
+    style: "visually appealing, informative"
+    
+  facebook:
+    max_duration: 60  # seconds
+    aspect_ratio: "16:9"
+    target_audience: "All ages"
+    style: "informative, shareable"
+
+# Content generation settings
+content:
+  topics:
+    - "Ancient Civilizations"
+    - "World Wars"
+    - "Scientific Discoveries"
+    - "Cultural Evolution"
+    - "Technological Milestones"
+  
+  style_guide:
+    tone: "engaging and educational"
+    language: "clear and accessible"
+    fact_verification: true
+    source_requirements: true
+    
+  quality_metrics:
+    engagement_threshold: 0.7
+    accuracy_threshold: 0.95
+    uniqueness_threshold: 0.8
+
+# AI Agent Settings
+agents:
+  research:
+    model: "gpt-4"
+    max_tokens: 2000
+    temperature: 0.7
+    
+  script:
+    model: "gpt-4"
+    max_tokens: 1500
+    temperature: 0.8
+    
+  voice:
+    provider: "google-cloud-texttospeech"
+    voice_id: "en-US-Neural2-F"
+    speaking_rate: 1.0
+    
+  visual:
+    provider: "dalle-3"
+    style: "historical, educational"
+    image_quality: "high"
+    
+  editor:
+    video_quality: "1080p"
+    audio_quality: "high"
+    transition_style: "smooth"
+
+# Output Settings
+output:
+  base_directory: "output"
+  file_naming: "{platform}_{topic}_{date}"
+  formats:
+    - "mp4"
+    - "jpg"
+  metadata: true 

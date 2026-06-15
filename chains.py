@@ -6,6 +6,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain_ollama import ChatOllama
 from langchain_aws import ChatBedrock
+from langchain_google_genai import ChatGoogleGenerativeAI
 
 from langchain_neo4j import Neo4jVector
 
@@ -81,7 +82,14 @@ def load_llm(llm_name: str, logger=BaseLogger(), config={}):
             model_kwargs={"temperature": 0.0, "max_tokens_to_sample": 1024},
             streaming=True,
         )
-
+    elif llm_name.startswith("gemini"):
+        logger.info(f"LLM: Using Gemini: {llm_name}")
+        return ChatGoogleGenerativeAI(
+            model=llm_name,
+            temperature=0,
+            streaming=True,
+            convert_system_message_to_human=True
+        )
     elif len(llm_name):
         logger.info(f"LLM: Using Ollama: {llm_name}")
         return ChatOllama(
@@ -89,10 +97,9 @@ def load_llm(llm_name: str, logger=BaseLogger(), config={}):
             base_url=config["ollama_base_url"],
             model=llm_name,
             streaming=True,
-            # seed=2,
-            top_k=10,  # A higher value (100) will give more diverse answers, while a lower value (10) will be more conservative.
-            top_p=0.3,  # Higher value (0.95) will lead to more diverse text, while a lower value (0.5) will generate more focused text.
-            num_ctx=3072,  # Sets the size of the context window used to generate the next token.
+            top_k=10,
+            top_p=0.3,
+            num_ctx=3072,
         )
     logger.info("LLM: Using GPT-3.5")
     return ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo", streaming=True)
