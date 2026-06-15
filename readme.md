@@ -41,7 +41,10 @@ Make sure to set the `OLLAMA_BASE_URL=http://llm:11434` in the `.env` file when 
 To use the Linux-GPU profile: run `docker compose --profile linux-gpu up`. Also change `OLLAMA_BASE_URL=http://llm-gpu:11434` in the `.env` file.
 
 **Windows**
-Ollama now supports Windows. Install [Ollama](https://ollama.ai) on Windows and start it before running `docker compose up` using `ollama serve` in a separate terminal. Alternatively, Windows users can generate an OpenAI API key and configure the stack to use `gpt-3.5` or `gpt-4` in the `.env` file.
+Ollama now supports Windows. Install [Ollama](https://ollama.ai) on Windows and start it before running `docker compose up` using `ollama serve` in a separate terminal. Alternatively, Windows users can generate an OpenAI API key and configure the stack to use `gpt-3.5` or `gpt-4` in the `.env` file. You can run your commands on [Windows Power Shell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4) if not pre-installed. You would also need to download and install [Git Bash](https://git-scm.com/download/win). You can run your commands on Windows PS or directly on Git Bash but make sure to run either of these with "Administrator" rights.
+
+Additionally, you will need to enable WSL 2 by opening `Docker Desktop` > `Settings` > `Resources` > `WSL Integration` and maker sure `Enable integration with my default WSL distro` is ticked mark. For Win 11 users, it gets automatically enabled during the installation of Docker Desktop.
+
 # Develop
 
 > [!WARNING]
