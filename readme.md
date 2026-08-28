@@ -11,10 +11,12 @@ Available variables:
 | Variable Name          | Default value                      | Description                                                             |
 |------------------------|------------------------------------|-------------------------------------------------------------------------|
 | OLLAMA_BASE_URL        | http://host.docker.internal:11434  | REQUIRED - URL to Ollama LLM API                                        |   
+| ORCAROUTER_BASE_URL    | https://api.orcarouter.ai/v1       | OPTIONAL - URL to the [OrcaRouter](https://www.orcarouter.ai) API       |
+| ORCAROUTER_API_KEY     |                                    | REQUIRED - Only if LLM=orcarouter/<model>                               |
 | NEO4J_URI              | neo4j://database:7687              | REQUIRED - URL to Neo4j database                                        |
 | NEO4J_USERNAME         | neo4j                              | REQUIRED - Username for Neo4j database                                  |
 | NEO4J_PASSWORD         | password                           | REQUIRED - Password for Neo4j database                                  |
-| LLM                    | llama2                             | REQUIRED - Can be any Ollama model tag, or gpt-4 or gpt-3.5 or claudev2 |
+| LLM                    | llama2                             | REQUIRED - Can be any Ollama model tag, or gpt-4 or gpt-3.5 or claudev2 or orcarouter/<model> |
 | EMBEDDING_MODEL        | sentence_transformer               | REQUIRED - Can be sentence_transformer, openai, aws, ollama or google-genai-embedding-001|
 | AWS_ACCESS_KEY_ID      |                                    | REQUIRED - Only if LLM=claudev2 or embedding_model=aws                  |
 | AWS_SECRET_ACCESS_KEY  |                                    | REQUIRED - Only if LLM=claudev2 or embedding_model=aws                  |
@@ -29,6 +31,7 @@ Available variables:
 ## LLM Configuration
 MacOS and Linux users can use any LLM that's available via Ollama. Check the "tags" section under the model page you want to use on https://ollama.ai/library and write the tag for the value of the environment variable `LLM=` in the `.env` file.
 All platforms can use GPT-3.5-turbo and GPT-4 (bring your own API keys for OpenAI models).
+All platforms can also use [OrcaRouter](https://www.orcarouter.ai) models by setting `LLM=orcarouter/<model>` (for example `orcarouter/fusion-mini`) and adding your `ORCAROUTER_API_KEY` to the `.env` file. OrcaRouter exposes an OpenAI-compatible endpoint, so the stack connects to it with the same LangChain `ChatOpenAI` integration used for OpenAI.
 
 **MacOS**
 Install [Ollama](https://ollama.ai) on MacOS and start it before running `docker compose up` using `ollama serve` in a separate terminal.

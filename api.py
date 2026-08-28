@@ -29,6 +29,8 @@ url = os.getenv("NEO4J_URI")
 username = os.getenv("NEO4J_USERNAME")
 password = os.getenv("NEO4J_PASSWORD")
 ollama_base_url = os.getenv("OLLAMA_BASE_URL")
+orcarouter_base_url = os.getenv("ORCAROUTER_BASE_URL")
+orcarouter_api_key = os.getenv("ORCAROUTER_API_KEY")
 embedding_model_name = os.getenv("EMBEDDING_MODEL")
 llm_name = os.getenv("LLM")
 # Remapping for Langchain Neo4j integration
@@ -47,7 +49,13 @@ neo4j_graph = Neo4jGraph(
 create_vector_index(neo4j_graph)
 
 llm = load_llm(
-    llm_name, logger=BaseLogger(), config={"ollama_base_url": ollama_base_url}
+    llm_name,
+    logger=BaseLogger(),
+    config={
+        "ollama_base_url": ollama_base_url,
+        "orcarouter_base_url": orcarouter_base_url,
+        "orcarouter_api_key": orcarouter_api_key,
+    },
 )
 
 llm_chain = configure_llm_only_chain(llm)

@@ -61,7 +61,19 @@ def load_embedding_model(embedding_model_name: str, logger=BaseLogger(), config=
 
 
 def load_llm(llm_name: str, logger=BaseLogger(), config={}):
-    if llm_name in ["gpt-4", "gpt-4o", "gpt-4-turbo"]:
+    if llm_name.startswith("orcarouter/"):
+        # OrcaRouter exposes its model namespace under the `orcarouter/` prefix on
+        # an OpenAI-compatible endpoint, so it can reuse ChatOpenAI directly.
+        logger.info(f"LLM: Using OrcaRouter: {llm_name}")
+        return ChatOpenAI(
+            temperature=0,
+            model_name=llm_name,
+            streaming=True,
+            base_url=config.get("orcarouter_base_url")
+            or "https://api.orcarouter.ai/v1",
+            api_key=config.get("orcarouter_api_key"),
+        )
+    elif llm_name in ["gpt-4", "gpt-4o", "gpt-4-turbo"]:
         logger.info("LLM: Using GPT-4")
         return ChatOpenAI(temperature=0, model_name=llm_name, streaming=True)
     elif llm_name == "gpt-3.5":
