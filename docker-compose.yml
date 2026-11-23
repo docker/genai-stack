@@ -213,7 +213,7 @@ services:
     ports:
       - 8504:8504
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 http://localhost:8504/ || exit 1"]
+      test: ["CMD", "curl", "--fail", "--silent", "--output", "/dev/null", "http://localhost:8504/"]
       interval: 5s
       timeout: 3s
       retries: 5
